@@ -2,7 +2,7 @@
 
 > **Proje türü:** Chrome / Microsoft Edge uzantısı · Manifest V3 · Yerel-öncelikli · Açık kaynak
 >
-> **Depo adı:** `OkuLens` · **Önerilen GitHub yolu:** `seydivakkas/OkuLens`
+> **Depo adı:** `OkuLens` · **GitHub deposu:** [seydivakkas/OkuLens](https://github.com/seydivakkas/OkuLens)
 >
 > **Durum (18 Ekim 2026):** **P0 geliştirme prototipi.** Bu README hem ürünün **hedef sözleşmesini** hem de prototipte **gerçekte bulunan işlevleri** açıkça ayırır. Canlı mağaza yayını, tüm tarayıcılar, yerel üretken Türkçe model, kararlı YouTube altyazısı ve doğrulanmış performans **henüz sağlanmış kabul edilmez**.
 
@@ -903,3 +903,22 @@ Kaynak, README, issues ve PR açıklamaları Türkçe; API/JSON alanları, paket
 ---
 
 **OkuLens, bir özetin yalnızca kısa değil, sınırları bilinen ve kaynağına dayanan bir özet olması gerektiği fikri üzerine kuruludur.**
+
+
+---
+
+## P1.1 — AI;DR arayüzüyle hibritleştirme (18 Ekim 2026)
+
+Yüklenen AI;DR Manifest V3 uzantı stüdyosu referansı incelendi ve **OkuLens kimliği korunarak** tasarım öğeleri ile TF-IDF/TextRank denetim görünümü uyarlanmıştır. Kaynak HTML'nin CDN ve inline script yapısı doğrudan uzantıya alınmamıştır.
+
+**Eklenenler:** koyu lacivert/gök mavisi native yan panel; 10/100/1000 kelime kartları; Kolay/Orta/Zor segmentleri; otomatik/çıkarımsal motor tercihi; kelime, sıkıştırma, okuma kazancı ve hesap süresi telemetrisi; anahtar kavram etiketleri; en yüksek beş TextRank cümlesinin karşılaştırmalı skorları; yerel kaynak senaryolarına sahip üç sekmeli `studio/index.html`; `shared/hybrid-nlp.mjs` analiz çekirdeği; testler.
+
+**Korunanlar:** mevcut hizmet çalışanı, sayfa içi Shadow DOM balonu, içerik çıkarıcıları, yerleşik AI uygunluk denetimi ve ayarlar altyapısı.
+
+**Henüz yok:** üretken Türkçe ONNX/WebGPU modeli, doğrulanmış Readability, Gmail/Outlook/YouTube tam kapsama, bütün sitelerde ilk seçimde otomatik balon, bağımsız gerçek tarayıcı cihaz kabulü. Teknik mimari matrisi ve sonraki işler: [docs/HYBRID_INTERFACE.md](docs/HYBRID_INTERFACE.md).
+
+### Simülatörü açma
+
+Chrome/Edge'de uzantıyı paketlenmemiş yükleyin ve yan panelin sağ üstündeki **Stüdyo** düğmesine basın. Yerel örneklerle makale/e-posta/YouTube arasında geçiş yapabilir, metin seçebilir, 10/100/1000 kelimelik çıkarımsal çıktıyı inceleyebilirsiniz. Analiz sayfasında başlık ağırlıklı TF-IDF ve bölüm bazlı TextRank göreli puanları görünür.
+
+> **Durum:** Kod ve Node birim testleri geliştirici ortamında doğrulanmıştır. Bu, gerçek tarayıcı entegrasyonunun doğrulandığı anlamına gelmez.

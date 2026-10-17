@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "OkuLens",
+  "version": "0.2.0",
+  "minimum_chrome_version": "116",
+  "description": "Makale, e-posta ve YouTube içeriğinde hibrit yerel NLP ve koşullu yerleşik AI ile gizlilik odaklı özetleme.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "sidePanel",
+    "storage",
+    "contextMenus"
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "side_panel": {
+    "default_path": "panel/index.html"
+  },
+  "action": {
+    "default_title": "OkuLens yan panelini aç"
+  },
+  "options_ui": {
+    "page": "options/index.html",
+    "open_in_tab": true
+  }
+}

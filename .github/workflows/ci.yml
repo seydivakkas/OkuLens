@@ -1,0 +1,18 @@
+name: OkuLens statik kontroller
+on:
+  push:
+  pull_request:
+jobs:
+  kontrol:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kodu al
+        uses: actions/checkout@v4
+      - name: Node kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript sözdizimini denetle
+        run: npm run check
+      - name: Birim testleri
+        run: npm test
