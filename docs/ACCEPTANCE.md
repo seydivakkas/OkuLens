@@ -20,6 +20,19 @@ Durum sözcükleri: `PASS` kanıtlı gerçek kabul; `PARTIAL` kapsam sınırlı;
 - [x] Gmail/Outlook/YouTube ayırıcıları için sentetik birim testleri.
 - [ ] Unit + e2e tarayıcı testleri (gerçek tarayıcı).
 
+## TİCARİ-003 — Gizlilik, KVKK ve modelin gerçek ağ kabulü
+
+- [x] TİCARİ-003 veri sınıflandırması, izin matrisi, model indirme, session/OPFS ve tehdit modeli belgelendi.
+- [x] SPA mesajlarından gereksiz URL alanı çıkarıldı; storage.local güvenilir uzantı bağlamlarına sınırlandırılacak biçimde başlatıldı.
+- [x] Kabule ait JSON raporunda ağ ölçülmemişken kesin “dışarı gönderilmedi” iddiası kaldırıldı.
+- [x] E-posta gövdesinin adres / kişisel veri içerebileceği kullanıcının gördüğü ekranda açıklandı.
+- [ ] Gerçek Chrome/Edge Network, egress ve hassas içerik sızıntısı testi (HOLD).
+- [ ] KVKK veri sorumlusu, hukuki sebep, aydınlatma ve ilgili kişi hakları uzman incelemesi (HOLD).
+- [ ] Chrome Web Store ve Edge Add-ons veri kullanımı beyanlarının gerçek yayımlama paketiyle doğrulanması (HOLD).
+- [ ] Hugging Face CDN/OPFS/Transformers.js gerçek Windows offline üretim kabulü (Issue #4 HOLD).
+
+[İşlem 004-B tarayıcı model kabulü](ISLEM_004B_TARAYICI_MODEL_DOGRULAMA.md) · [TİCARİ-003 gizlilik sözleşmesi](TICARI_003_GIZLILIK_KVKK_GUVENLIK.md)
+
 ## TİCARİ-002 — Tarayıcı modeli depolama
 
 - [x] OPFS yönetimi, indirme onayı ve sabit model kataloğu kodlandı.
