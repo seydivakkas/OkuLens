@@ -17,7 +17,7 @@ export function createLocalModelCache({
  if(base.protocol!=='chrome-extension:')throw new Error('LOCAL_MODEL_ORIGIN_INVALID');
  if(!modelId.match(/^[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+$/))throw new Error('LOCAL_MODEL_ID_INVALID');
  const modelPrefix=new URL(modelId+'/',base).href;
- const trustedOrigin=base.origin;
+ const trustedHost=base.hostname;
  const allowed=new Set(allowedPaths||[]);
  const stats={lookups:0,hits:0,misses:0,rejectedRemote:0};
  function resolve(input){
@@ -26,7 +26,7 @@ export function createLocalModelCache({
   let url;
   try{url=new URL(urlString,base);}catch{return {kind:'invalid'};}
   if(url.protocol==='http:'||url.protocol==='https:')return {kind:'remote',url:url.href};
-  if(url.origin!==trustedOrigin||url.protocol!=='chrome-extension:')return {kind:'invalid'};
+  if(url.hostname!==trustedHost||url.protocol!=='chrome-extension:')return {kind:'invalid'};
   if(!url.href.startsWith(modelPrefix))return {kind:'extension-other'};
   let relative;
   try{relative=decodeURIComponent(url.pathname.slice(new URL(modelPrefix).pathname.length));}
