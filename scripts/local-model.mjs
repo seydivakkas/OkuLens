@@ -7,6 +7,7 @@ import {mkdir,readFile,rename,rm,stat} from 'node:fs/promises';
 import {Readable,Transform} from 'node:stream';
 import {pipeline} from 'node:stream/promises';
 import path from 'node:path';
+import {pathToFileURL} from 'node:url';
 
 export const MODEL_ID='onnx-community/Qwen3-0.6B-Instruct-ONNX';
 export const REVISION='54250909aca286a05b9d013c8af7a21859ee6ead';
