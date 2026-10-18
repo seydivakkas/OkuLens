@@ -137,7 +137,9 @@ function download(){
   backendPreference:$('backend').value,
   clientTimestamp:new Date().toISOString(),
   wasmAndWeightsBundledInRepo:false,
-  sentToRemote:false
+  networkCaptureStatus:'NOT_MEASURED',
+  networkEvidenceSha256:null,
+  offlineInferenceVerified:false
  };
  const bytes=new Blob([JSON.stringify(report,null,2)+'\n'],{type:'application/json;charset=utf-8'});
  const url=URL.createObjectURL(bytes);
