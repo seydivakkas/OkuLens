@@ -39,6 +39,8 @@ test('Gmail görünür ileti değişiminde yalnızca kapsam olayı gönderilir',
   assert.equal(x.messages.length, 1);
   assert.equal(x.messages[0].reason, 'email-dom');
   assert.equal(x.messages[0].type, 'OKULENS_SOURCE_CHANGED');
+  assert.equal(Object.hasOwn(x.messages[0], 'url'), false);
+  assert.equal(JSON.stringify(x.messages).includes('mail.google.com'), false);
   assert.equal(JSON.stringify(x.messages).includes('Başka bir görünür ileti'), false);
   x.sandbox.__okulensSpaMonitor.stop();
   assert.equal(x.disconnected, true);
@@ -52,6 +54,7 @@ test('YouTube SPA navigasyonu URL değişikliği bildirir; pagehide temizler', a
   await pause();
   assert.equal(x.messages.length, 1);
   assert.equal(x.messages[0].reason, 'navigation');
+  assert.equal(Object.hasOwn(x.messages[0], 'url'), false);
   x.events.get('pagehide')();
   assert.equal(x.disconnected, true);
   assert.equal(x.events.size, 0);
