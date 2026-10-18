@@ -46,7 +46,7 @@ Aşağıdaki tablo GitHub main kodundan elde edilen **tasarım ve kod gözlemidi
 ## 3. Chrome/Edge izin ve veri erişim sözleşmesi
 
 **Mevcut manifest izni:** activeTab, scripting, sidePanel, storage, contextMenus.  
-**Opsiyonel host izni:** https://huggingface.co/* — yalnız model kurulumu isteyen kullanıcıya çalışma zamanında sorulur.  
+**Opsiyonel host izinleri:** https://huggingface.co/* ve CI HTTP GET/HEAD denetiminde gözlenen https://us.aws.cdn.hf.co/* — yalnız model kurulumu isteyen kullanıcıya çalışma zamanında birlikte sorulur. Host zinciri Windows Chrome/Edge kabulü hâlâ HOLD.  
 **Mevcut olmayanlar:** genel host_permissions, cookies, webRequest, history, debugger, uzaktan LLM API izni.
 
 | İzin | Tek işlev | Erişim sınırı ve doğrulama |
