@@ -3,6 +3,7 @@
  * Model metadata küçük chrome.storage.local kaydıdır; ONNX baytları sadece OPFS'dedir.
  */
 import {IncrementalSHA256} from './incremental-sha256.mjs';
+import {fetchModelAsset} from './model-download-policy.mjs';
 import {MODEL, STORE_KEY, STORE_PREFIX, STORAGE_LAYOUT,assetsFor,makeRemoteURL} from './browser-model-catalog.mjs';
 
 const LIMIT_MULTIPLIER=1.35;
@@ -82,8 +83,11 @@ export async function installBrowserModel(backend,{
    for(let i=0;i<assets.length;i++){
     const asset=assets[i];
     if(signal?.aborted)throw new DOMException('İptal edildi','AbortError');
-    const url=makeRemoteURL(asset.path);
-    const response=await deps.fetcher(url,{signal,cache:'no-store',redirect:'follow'});
+    const response=await fetchModelAsset(asset.path,{
+     fetcher:deps.fetcher,signal,
+     onHost:hostname=>onProgress({stage:'cdn-host',host:hostname,
+      path:asset.path,index:i+1,totalFiles:assets.length,bytes:0})
+    });
     if(!response.ok||!response.body)throw new Error('MODEL_HTTP_'+response.status+' '+asset.path);
     // Onnx ağırlığına ait sabit SHA dosyanın hatasız ve beklenen sürümde olduğunun ön şartı.
     const max=asset.sha256?Math.ceil(MODEL.backend[backend].estimatedBytes*1.35):MAX_METADATA_BYTES;
