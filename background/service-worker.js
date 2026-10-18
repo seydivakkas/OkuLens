@@ -3,6 +3,13 @@ const MENU_SUMMARIZE = 'okulens-summarize-selection';
 
 async function initialize() {
   try {
+    // chrome.storage.local varsayılan olarak content scripts'e açıktır.
+    // Model manifesti ve tercihler yalnızca güvenilir uzantı sayfalarından okunmalı.
+    await chrome.storage.local.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'});
+  } catch (error) {
+    console.warn('OkuLens storage erişim sınırı kurulamadı:', String(error?.name||'STORAGE_ACCESS_LEVEL_FAILED'));
+  }
+  try {
     await chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
   } catch (error) {
     console.warn('OkuLens yan panel davranışı kurulamadı:', error);

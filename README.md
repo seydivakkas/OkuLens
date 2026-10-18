@@ -1005,3 +1005,8 @@ Ticari uygunluk dosyaları:
 Uzantının **Ayarlar → Tarayıcıda model yönetimi** bölümünde kullanıcı WebGPU veya WASM seçer, model kaynağı/lisansı/boyutunu görür, açık onay verir ve yalnız Hugging Face için opsiyonel izin istenir. Dosyalar OPFS uzantı deposuna parça halinde kaydedilir; ONNX ağırlığının upstream SHA-256 değeri ve bütün dosyaların kayıtlı hashleri doğrulanır. Kota, ilerleme, indirme iptali, bütünlüğü yeniden kontrol etme ve model silme seçenekleri vardır. Depolama manifesti tamamlanmamış bir yüklemeyi başarılı göstermez. Eski Node.js geliştirici kurulum yolu korunur.
 
 **Sınır:** Transformers.js Worker'ına OPFS model Response'u sunan adaptör kodlandı; ancak büyük Qwen modelinin gerçek Chrome/Edge tarayıcısında Hugging Face CDN yönlendirmeleriyle indirilmesi, OPFS'ten yüklenmesi, offline Türkçe üretim ve bellek/streaming kabulü henüz doğrulanmadı. Bu özellik geliştirici prototipidir; **Issue #4 ve ticari yayımlama HOLD**.
+
+
+## TİCARİ-003 — Gizlilik, KVKK ve tarayıcı izinleri (18 Ekim 2026)
+
+[TİCARİ-003 veri akış ve güvenlik sözleşmesi](docs/TICARI_003_GIZLILIK_KVKK_GUVENLIK.md) ile e-posta, makale, YouTube, kaynak URL'si, geçici özet, model indirme ve OPFS saklama davranışları ayrı veri sınıflarına ayrıldı. SPA bildirimlerinde kaynak URL'si gönderilmiyor; chrome.storage.local alanı güvenilir uzantı bağlamlarıyla sınırlanmak üzere başlatılıyor. Gizlilik sayfası tarayıcı OPFS indirmesiyle uyumlu güncellendi. Bunlar kod seviyesinde iyileştirmelerdir; gerçek Windows Chrome/Edge ağ, depolama ve KVKK/mağaza uzman kabulü HOLD'dur.

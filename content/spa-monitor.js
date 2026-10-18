@@ -1,5 +1,5 @@
 /* OkuLens — SPA gözlemcisi. URL / görünür e-posta gövdesi değişince panel önbelleğini geçersizleştirir.
- * Mutasyon verisini veya e-posta içeriğini arka plana GÖNDERMEZ.
+ * SPA bildirimleri yalnız sabit olay türüdür; URL, DOM ve e-posta metni GÖNDERİLMEZ.
  */
 (() => {
   'use strict';
@@ -19,7 +19,7 @@
   }
   function send(reason) {
     try {
-      chrome.runtime.sendMessage({ type: 'OKULENS_SOURCE_CHANGED', url: location.href, reason }).catch(() => {});
+      chrome.runtime.sendMessage({ type: 'OKULENS_SOURCE_CHANGED', reason }).catch(() => {});
     } catch { stop(); }
   }
   function check() {

@@ -18,7 +18,7 @@ Sayfayı çıkarmak, yerel TF-IDF/TextRank ya da isteğe bağlı kurulu ONNX mod
 
 ## 3. İnternet bağlantısı
 
-İsteğe bağlı Qwen ONNX modelinin ilk kurulumu sırasında kullanıcının açık komutuyla Hugging Face üzerinden model dosyaları indirilir. Bu indirme, özetlenmek istenen e-posta/metni modele göndermek için değildir. Derleme sırasında npm bağımlılıkları ağdan indirilebilir. Chrome yerleşik AI özelliği etkinleştirilirse tarayıcının kendi model dağıtım mekanizmasının ayrıca belgelenmesi gerekir. Reklam/analitik amaçlı otomatik veri paylaşımı kapsam dışıdır.
+İsteğe bağlı Qwen ONNX modelinin ilk kurulumu, Ayarlar içinden kullanıcının açık indirme onayı ve isteğe bağlı Hugging Face izniyle OPFS'ye model dosyaları yazmayı hedefler; geliştiriciye yönelik Node.js kurulumu alternatif olarak korunur. Tarayıcı sürümünde CDN yönlendirmeleri ve gerçek kurulum kabulü henüz HOLD'dur. Model indirme sunucuları IP/bağlantı meta verilerini işleyebilir. Bu indirme, özetlenmek istenen e-posta/metni modele göndermek için değildir. Derleme sırasında npm bağımlılıkları ağdan indirilebilir. Chrome yerleşik AI özelliği etkinleştirilirse tarayıcının kendi model dağıtım mekanizmasının ayrıca belgelenmesi gerekir. Reklam/analitik amaçlı otomatik veri paylaşımı kapsam dışıdır.
 
 ## 4. Üçüncü taraf platformlar
 
@@ -26,7 +26,7 @@ Gmail, Outlook ve YouTube içerikleri kullanıcıların açık oturumları için
 
 ## 5. Saklama ve silme
 
-`chrome.storage.local` içindeki tercihler kullanıcı tarafından değiştirilebilir. `chrome.storage.session` verileri tarayıcı oturumuna bağlı geçicidir. Paneldeki `Temizle` düğmesi ilgili sekmenin saklı özetini kaldırır. Tarayıcı uzantısını kaldırma ve tarayıcı verisini silme seçenekleri kullanıcıya açıktır. Dışa aktarılan yerel dosyalar tarayıcı uzantısı tarafından otomatik silinmez. Model dosyaları kullanıcı isteğiyle `npm run model:remove -- --confirm` komutuyla kaldırılır.
+`chrome.storage.local` içindeki tercihler kullanıcı tarafından değiştirilebilir. `chrome.storage.session` verileri tarayıcı oturumuna bağlı geçicidir. Paneldeki `Temizle` düğmesi ilgili sekmenin saklı özetini kaldırır. Tarayıcı uzantısını kaldırma ve tarayıcı verisini silme seçenekleri kullanıcıya açıktır. Dışa aktarılan yerel dosyalar tarayıcı uzantısı tarafından otomatik silinmez. Tarayıcı OPFS model dosyaları Ayarlar içindeki Sil düğmesiyle, geliştirici klasöründeki ayrı model ise `npm run model:remove -- --confirm` komutuyla kaldırılabilir. Tarayıcı deposunun gerçek cihazda kalıcılık, silme ve çökme sonrası temizliği henüz HOLD'dur.
 
 ## 6. Güvenlik, sınırlamalar, kullanıcı hakları
 
@@ -36,8 +36,10 @@ Hassas iş e-postaları/kişisel verileri işleyen kullanıcılar cihaz güvenli
 
 - Gerçek yayıncı/tüzel kişilik ve geçerli destek/iletişim adresi.
 - Sürümde kullanılan bütün kodun gerçek ağ ve veri akışı denetimi.
-- Chrome Web Store kullanıcı verisi sınıflandırması ve zorunlu politikaya erişilebilir URL.
+- Chrome Web Store kullanıcı verisi sınıflandırması ve zorunlu politikaya erişilebilir URL. Kaynak ve e-posta özetleri kişisel veri içerebilir; yerel işleme KVKK analizini ortadan kaldırmaz.
 - Türkiye KVKK ve varsa GDPR uygunluğunun uygulanabilirlik ve rol temelli uzman incelemesi.
 - Gmail/Outlook/YouTube hizmet şartı ve tarayıcı mağaza kabul süreci.
+
+TİCARİ-003 teknik veri haritası ve tehdit modeli: [TİCARİ-003](TICARI_003_GIZLILIK_KVKK_GUVENLIK.md).
 
 **Karar:** Bu taslak tek başına ticari ürünün gizlilik hukuku uygunluğunu kanıtlamaz.
