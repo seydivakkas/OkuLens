@@ -6,7 +6,7 @@ export const MODEL={
  id:'onnx-community/Qwen3-0.6B-Instruct-ONNX',
  revision:'54250909aca286a05b9d013c8af7a21859ee6ead',
  license:'Apache-2.0',
- requiredMetadata:['config.json','tokenizer.json','tokenizer_config.json','generation_config.json','chat_template.jinja'],
+ requiredMetadata:['config.json','tokenizer.json','tokenizer_config.json','generation_config.json','chat_template.jinja','added_tokens.json','merges.txt','special_tokens_map.json','vocab.json'],
  backend:{
   webgpu:{weight:'onnx/model_q4f16.onnx',sha256:'4ad5a67d818b55749eb4cad425ca542a7aa9ea66eba11a0d31ab6b81f35a182d',estimatedBytes:648000000},
   wasm:{weight:'onnx/model_q4.onnx',sha256:'a1efc0c2ec91473bcd8cd27b2a25d50452252eac5a5d582722cbdc7d8e11f13d',estimatedBytes:997000000}
