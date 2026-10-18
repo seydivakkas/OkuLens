@@ -23,3 +23,5 @@ models/
 
 # Ticari envanter ve paketleme çıktıları
 /vendor/ticari-lisanslar/
+
+/vendor/runtime-inputs.json
