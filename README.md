@@ -4,7 +4,7 @@
 >
 > **Depo adı:** `OkuLens` · **GitHub deposu:** [seydivakkas/OkuLens](https://github.com/seydivakkas/OkuLens)
 >
-> **Durum (18 Ekim 2026):** **v0.3.0 geliştirme prototipi (P3 kaynak çıkarımı: sentetik PASS; gerçek Chrome/Edge HOLD).** Bu README hem ürünün **hedef sözleşmesini** hem de prototipte **gerçekte bulunan işlevleri** açıkça ayırır. Canlı mağaza yayını, tüm tarayıcılar, yerel üretken Türkçe model, kararlı YouTube altyazısı ve doğrulanmış performans **henüz sağlanmış kabul edilmez**.
+> **Durum (18 Ekim 2026):** **v0.4.0 geliştirme prototipi (P4 üretken ONNX adaptörü: sentetik PASS; model ağırlıkları ve gerçek Chrome/Edge inference HOLD).** Bu README hem ürünün **hedef sözleşmesini** hem de prototipte **gerçekte bulunan işlevleri** açıkça ayırır. Canlı mağaza yayını, tüm tarayıcılar, yerel üretken Türkçe model, kararlı YouTube altyazısı ve doğrulanmış performans **henüz sağlanmış kabul edilmez**.
 
 **OkuLens**, bir web sayfasında seçilen metni, makaleyi, e-posta gövdesini veya mevcut YouTube transkriptini kullanıcının istediği seviyede anlaşılır kılmayı amaçlayan; okuma sayfasını terk ettirmeden tarayıcının yerleşik yan panelinde çalışan bir asistandır. Önceliği **yerel işleme, kullanıcı kontrolü, kaynakla ilişkilendirme ve aboneliksiz kullanım**dır. Kullanıcının içeriği üçüncü taraf bir LLM API'sine varsayılan olarak gönderilmez.
 
@@ -107,7 +107,7 @@ Burada **P0 = paket içindeki kaynak kod**, **Plan = henüz yazılmadı**, **Ko�
 | 10/100/1000 hedefleri | Kelime bütçesi ve kaynak uyarısı | **P0 extractive hedefleme**, kesin kelime garantisi yok |
 | Kolay/Orta/Zor | Üretken stil uyarlama | **P0 UI**, gerçek üretken uyarlama **Koşullu/Plan** |
 | Yerleşik Summarizer | Chrome uygun dil/donanım | **Koşullu entegrasyon**, cihazda denenmedi |
-| Türkçe lokal ONNX modeli | GPU/WASM | **Plan**, model paketi yok |
+| Türkçe lokal ONNX modeli | GPU/WASM | **P4 koşullu Worker/adaptör kodu mevcut; model paketi kurulmadı, gerçek inference HOLD** |
 | E-posta | Gmail/Outlook | **P3 kapsam seçimi + bağımsız DOM adaptörleri**, sentetik PASS; canlı hesap kabulü HOLD |
 | YouTube | Altyazı/zaman damgası | **P3 açık transkript DOM + doğrulanan zaman damgası**, sentetik PASS; imzalı altyazı erişimi kapsam dışı/ayrı değerlendirme |
 | Hiyerarşik Map-Reduce | Çok uzun belgeler | **Plan** |
@@ -796,7 +796,7 @@ npm test
 | **P2 — Email Extractors** | Gmail/Outlook adaptörleri, görünür ileti/zincir kapsamı | Sentetik testler başarılı; gerçek Gmail/Outlook ve alıntı ayrıştırma kabulü son aşamada | Kısmi |
 | **P3 — YouTube Extractors** | Açık transkript segmentleri, gerçek timestamp ve Shorts kimliği | Sentetik testler başarılı; canlı videolar ve manuel/ASR uyumluluğu HOLD | Kısmi |
 | **P4 — Summary Engine** | Chunking, TF-IDF/TextRank opsiyonel, Map-Reduce | Uzun içerik coverage ve kelime ölçümü | Plan |
-| **P5 — Local Generative AI** | Native motor, yerel çok dilli ONNX, GPU/WASM | Türkçe gerçek çıktı, lisans, SHA ve bellek | Plan |
+| **P5 — Local Generative AI** | ONNX Qwen3 0.6B adaptörü, WebGPU/WASM, kullanıcı onaylı SHA installer | Kod + sentetik testler; gerçek Türkçe model çıktısı ve Windows kabulü HOLD | Kısmi |
 | **P6 — UX** | Bubble, panel, ayarlar, onboarding, popup, erişilebilirlik | Tüm ekran/boş-hata-yükleniyor davranışları | Plan |
 | **P7 — Security & Privacy** | İzin ekranı, saklama politikası, CSP, MV3 inceleme | Gizlilik testleri + tehdit analizleri | Plan |
 | **P8 — CI, E2E, paketleme** | Test, değişiklik kaydı, Chrome/Edge zip | CI kanıtı + unpacked ve mağaza paketi | Plan |
@@ -926,3 +926,28 @@ Chrome/Edge'de uzantıyı paketlenmemiş yükleyin ve yan panelin sağ üstünde
 ### İşlem 003 uygulama notu (18 Ekim 2026)
 
 [Gmail, Outlook, YouTube ve SPA çıkarımı](docs/ISLEM_003_KAYNAK_CIKARIMI.md) kapsamında kaynaklar kullanıcı komutuyla ayrıştırılır. E-posta gövdelerindeki gönderen/alıcı meta alanları bilerek alınmaz; ancak e-posta metninin kendisi bir adres barındırıyorsa otomatik anonimleştirme yoktur. Gizlilik açısından e-posta özetleri sekme oturumu önbelleğine yazılmaz. YouTube için yalnızca açılmış transkript DOM'u işlenir; altyazısız, kapalı transkriptli veya desteklenmeyen DOM varyantlarında açık hata döner. Aktif sekmede geçici `activeTab` erişimi kaybolursa kullanıcı uzantı ikonundan yeniden başlatmalıdır. Sentetik CI başarısı gerçek Windows Chrome/Edge kabulü yerine geçmez.
+
+
+---
+
+## P4 — Koşullu Yerel Türkçe Üretken Model (18 Ekim 2026)
+
+**Önemli:** Repo içinde büyük ağırlık dosyaları ve derlenmiş Transformers.js runtime dosyaları bulunmaz. Bu nedenle yalnızca GitHub deposunu klonlamak **çalışan üretken model kurmaz**. Üretken AI'nın gerçekten çalıştığı hiçbir Chrome/Edge/Windows cihazında henüz doğrulanmadı.
+
+**Kaynak ve lisans:** [Qwen3-0.6B-Instruct-ONNX](https://huggingface.co/onnx-community/Qwen3-0.6B-Instruct-ONNX), Apache-2.0; kodla entegre edilen Transformers.js 3.8.1 de Apache-2.0. ONNX WebGPU ağırlığı için SHA-256: `4ad5a67d818b55749eb4cad425ca542a7aa9ea66eba11a0d31ab6b81f35a182d`; WASM q4 ağırlığı için SHA-256: `a1efc0c2ec91473bcd8cd27b2a25d50452252eac5a5d582722cbdc7d8e11f13d`. İndirme kaynak commitine sabittir; meta dosyalar da yerel manifest SHA kayıtlarıyla doğrulanabilir.
+
+Windows PowerShell terminalinde, proje ana dizininden kullanıcı isteğiyle:
+```powershell
+npm install
+npm run build:runtime
+npm run model:install -- --accept-license --backend=webgpu
+npm run model:verify
+```
+
+CPU/WASM gerektiren donanım için ayrıca `npm run model:install -- --accept-license --backend=wasm`; iki paketi birlikte kurmak için `--backend=both`. Kurulu modeli kaldırma: `npm run model:remove -- --confirm`.
+
+Kurulumdan sonra yan panelde **Yerel üretken ONNX** motoru seçilerek model iş akışı tetiklenebilir. Bu yol model bulunmadığında veya yükleme hatasında **yerel TF-IDF/TextRank fallback** kullanır, üretken çıktı üretildiğini iddia etmez. Harici ücretli API veya kullanıcı API anahtarı gerekmez.
+
+Motor; kaynak metni yaklaşık 3.500 karakterlik pasajlara böler, uzun metni map–reduce ile ele alır, pasaj kimliklerini korur ve üretilen gerçek kelimeleri sayar. Kelime hedefleri *yaklaşıktır*. Geçici streaming çıktısı nihai sonuç değildir. Üretilen açıklamalar bağımsız iddia doğrulamasından geçmediği için model yanılgısı riski mevcuttur.
+
+**Detaylı mimari, kullanıcı onayı, model SHA/Lisans ve kabul sınırları:** [İşlem 004 — Yerel Üretken AI](docs/ISLEM_004_YEREL_URETKEN_AI.md). **Issue #4 açık/HOLD kalır**, gerçek model yüklenip ilk Türkçe inference ve bağımsız Windows Chrome/Edge kabulü alınmadıkça ürün özelliği PASS ilan edilemez.

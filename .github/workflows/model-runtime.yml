@@ -1,0 +1,32 @@
+name: OkuLens yerel model runtime paketleme
+on:
+  pull_request:
+    paths:
+      - "package.json"
+      - "scripts/build-runtime.mjs"
+      - "worker/**"
+      - ".github/workflows/model-runtime.yml"
+  push:
+    branches:
+      - "feature/issue-4-offline-qwen-onnx-generative"
+  workflow_dispatch:
+jobs:
+  runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Kaynak kodunu al
+        uses: actions/checkout@v4
+      - name: Node 22 kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Tarayıcı paket bağımlılıkları
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Yerel runtime paketle
+        run: npm run build:runtime
+      - name: Paket çıktısını doğrula
+        run: |
+          test -s vendor/transformers.runtime.mjs
+          test -s vendor/runtime-build.json
+          find vendor/ort -maxdepth 1 -name '*.wasm' -size +0c | grep -q .
