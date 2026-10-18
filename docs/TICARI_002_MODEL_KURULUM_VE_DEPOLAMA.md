@@ -35,6 +35,10 @@ OPFS / okulens-model-v1 / rastgele-kurulum-kimliği /
   tokenizer_config.json
   generation_config.json
   chat_template.jinja
+  added_tokens.json
+  merges.txt
+  special_tokens_map.json
+  vocab.json
   onnx / model_q4f16.onnx       (WebGPU)
   veya onnx / model_q4.onnx    (WASM)
 ~~~
@@ -75,9 +79,9 @@ Yeni teknik dosyalar:
 - shared/browser-model-store.mjs — OPFS işlemleri, kota, model manifesti, atomik geçiş, hash denetimi, silme ve dosyayı Response olarak okuma.
 - options/index.html / options/options.js — kullanıcı onayı, opsiyonel host yetkisi, backend seçimi, dosya aktarımı, iptal, yeniden doğrulama, silme.
 
-**Kritik sınır:** Bu kodun model baytlarını OPFS'e saklayabilmesi ile ONNX Runtime'ın gerçek Türkçe model üretmesi farklıdır. Mevcut Issue #4 model worker'ının eski paket içi model URL'sini kullanması nedeniyle yeni OPFS deposunun Transformers.js v3.8.1 ile arayüzlenmesi ayrı entegrasyon koşuludur. OPFS'ten bir Response üretilebilmesi, kütüphanenin modelin tüm tokenizer/ONNX dosyalarını otomatik olarak bulduğu anlamına gelmez.
+**Kritik sınır:** Model köprüsü artık OPFS manifestini Worker'a aktarır; Worker, paket içindeki eski model yoluna ek olarak OPFS Response ve Transformers.js 3.8.1 customCache üzerinden dosyaları sunmayı deneyen yeni bir adaptör içerir. Bu, kod entegrasyonu adayıdır. Gerçek Qwen ONNX inference / Chrome ve Edge içindeki yürütme sırası henüz doğrulanmamıştır; dosyanın OPFS'te olması üretken model kabulü değildir.
 
-Transformers.js, customCache.match / put biçiminde önbellek özelleştirmesi sunar. Bu API'nin gerçek çalışma sırası, model dosyası URL anahtarı, dtype ve büyük dosya tüketimi **gerçek çalışma testinde** onaylanmalıdır. Bunu doğrulamadan model varsayılan motoru aktif hale getirilmez.
+Transformers.js, customCache.match / put biçiminde önbellek özelleştirmesi sunar. Worker bunun için yalnızca katalogdaki yerel dosyalara cevap veren bir adaptör kullanır ve allowRemoteModels=false kalır. API'nin gerçek çalışma sırası, model URL anahtarı, dtype ve büyük dosya tüketimi **gerçek Chrome/Edge testinde** onaylanmalıdır. Başarısız yükleme açıkça TextRank fallback olarak etiketlenir.
 
 ## 6. Kota, bellek ve depolama garantisi
 
