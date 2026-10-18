@@ -27,37 +27,18 @@
     };
     return globalThis.__okulensExtractArticle(document);
   }
-  function extractEmail() {
-    const selectors = location.hostname.includes('google')
-      ? '.a3s, .aiL'
-      : '[data-testid="message-body"], [role="document"], .rps_0';
-    const nodes = [...document.querySelectorAll(selectors)].filter(isVisible);
-    const seen = new Set();
-    return [...nodes].map(el => clean(el.innerText)).filter(t => {
-      if (!t || seen.has(t)) return false;
-      seen.add(t); return true;
-    }).join('\n\n').slice(0, MAX_CHARS);
-  }
-  function parseStamp(stamp) {
-    const parts = stamp.trim().split(':').map(Number);
-    if (!parts.length || parts.some(n=>!Number.isFinite(n))) return null;
-    let seconds = 0;
-    for (const n of parts) seconds = 60 * seconds + n;
-    return Math.floor(seconds * 1000);
+  function extractEmail(scope) {
+    return typeof globalThis.__okulensExtractEmail === 'function'
+      ? globalThis.__okulensExtractEmail(document, location.hostname, scope, window)
+      : { text: '', status: 'unavailable', warnings: ['EMAIL_EXTRACTOR_NOT_LOADED'] };
   }
   function extractYouTube() {
-    const selectors = 'ytd-transcript-segment-renderer, ytd-transcript-segment-view-model';
-    const transcript = [...document.querySelectorAll(selectors)].filter(isVisible).map(el => {
-      const stamp = el.querySelector('.segment-timestamp, .ytwTranscriptSegmentViewModelHost .yt-core-attributed-string')?.textContent
-        || el.querySelector('[class*=timestamp]')?.textContent || '';
-      const text = clean(el.querySelector('.segment-text, [class*=segment-text], .ytwTranscriptSegmentViewModelHost')?.textContent || el.textContent);
-      const startMs = parseStamp(stamp);
-      return (startMs === null || !text) ? null : { startMs, text };
-    }).filter(Boolean);
-    return { transcript, text: transcript.map(x => x.text).join(' ').slice(0, MAX_CHARS) };
+    return typeof globalThis.__okulensExtractYouTube === 'function'
+      ? globalThis.__okulensExtractYouTube(document, location.href, window)
+      : { text: '', transcript: [], status: 'unavailable', warnings: ['YOUTUBE_EXTRACTOR_NOT_LOADED'] };
   }
-  function extract() {
-    const selected = clean(String(getSelection() ?? '')) || lastSelection;
+  function extract(request = {}) {
+    const selected = clean(String(getSelection() ?? '')) || (request.usePendingSelection ? lastSelection : '');
     const kind = sourceKind();
     const base = {
       schemaVersion: 1, sourceUrl: location.href, sourceTitle: document.title,
@@ -66,16 +47,12 @@
     };
     if (selected.length > 2) return { ...base, sourceType: 'selection', extractionMethod: 'selection', text: selected.slice(0, MAX_CHARS) };
     if (kind === 'email') {
-      const text = extractEmail();
-      return { ...base, sourceType: 'email', extractionMethod: 'visible-email-dom', text,
-        status: text ? 'partial' : 'unavailable', warnings: ['E-posta DOM çıkarımı deneyseldir; mesaj kapsamını doğrulayın.'] };
+      const email = extractEmail(request.emailScope);
+      return { ...base, ...email, sourceType: 'email' };
     }
     if (kind === 'youtube') {
-      const { transcript, text } = extractYouTube();
-      return { ...base, sourceType: 'youtube', extractionMethod: 'visible-transcript-dom', text, transcript,
-        status: text ? 'partial' : 'unavailable', warnings: text
-          ? ['Yalnızca açık transkript panelinde görünür zaman kodları yakalandı.']
-          : ['TRANSCRIPT_UNAVAILABLE: Videonun transkript panelini açıp yeniden deneyin.'] };
+      const video = extractYouTube();
+      return { ...base, ...video, sourceType: 'youtube' };
     }
     const article = extractArticle();
     return {
@@ -84,6 +61,8 @@
       language: (article.language || base.language).split('-')[0].toLowerCase()
     };
   }
+
+  globalThis.__okulensSpaMonitor?.start();
 
   function ensureBubble() {
     if (bubble) return;
@@ -117,14 +96,29 @@
       bubble.style.display = 'block';
     }, 80);
   }
+  window.addEventListener('popstate', () => { lastSelection = ''; hideBubble(); });
+  window.addEventListener('hashchange', () => { lastSelection = ''; hideBubble(); });
+  window.addEventListener('yt-navigate-finish', () => { lastSelection = ''; hideBubble(); });
   document.addEventListener('mouseup', updateSelection, { passive: true });
   document.addEventListener('keyup', e => { if (e.key === 'Escape') hideBubble(); else updateSelection(); });
   chrome.runtime.onMessage.addListener((message, _sender, reply) => {
-    if (message?.type === 'OKULENS_EXTRACT') { reply({ ok: true, document: extract() }); return; }
+    if (message?.type === 'OKULENS_EXTRACT') {
+      const result = extract({ emailScope: message.emailScope, usePendingSelection: Boolean(message.usePendingSelection) });
+      lastSelection = '';
+      reply({ ok: true, document: result });
+      return;
+    }
     if (message?.type === 'OKULENS_SEEK_VIDEO') {
       const video = document.querySelector('video');
       const ms = Number(message.startMs);
-      if (video && Number.isFinite(ms) && ms >= 0) { video.currentTime = ms / 1000; reply({ ok: true }); }
+      const currentVideoId = typeof globalThis.__okulensExtractYouTube === 'function'
+        ? new URLSearchParams(location.search).get('v') || location.pathname.match(/^\/shorts\/([A-Za-z0-9_-]{11})/)?.[1]
+        : null;
+      if (message.videoId && currentVideoId !== message.videoId) {
+        reply({ ok: false, error: 'VIDEO_CHANGED' });
+      } else if (video && Number.isFinite(ms) && ms >= 0) {
+        video.currentTime = ms / 1000; reply({ ok: true });
+      } else reply({ ok: false, error: 'VIDEO_UNAVAILABLE' });
       else reply({ ok: false, error: 'VIDEO_UNAVAILABLE' });
     }
   });
