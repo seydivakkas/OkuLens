@@ -119,7 +119,6 @@
       } else if (video && Number.isFinite(ms) && ms >= 0) {
         video.currentTime = ms / 1000; reply({ ok: true });
       } else reply({ ok: false, error: 'VIDEO_UNAVAILABLE' });
-      else reply({ ok: false, error: 'VIDEO_UNAVAILABLE' });
     }
   });
 })();
