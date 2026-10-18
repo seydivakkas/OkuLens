@@ -101,6 +101,12 @@ async function changeTab(tabId) {
   showResult(null);
   const stored = await chrome.storage.session.get(`summary:tab:${tabId}`);
   const cached = stored[`summary:tab:${tabId}`];
+  // E-postalar oturum önbelleğinde tutulmaz: aynı URL altında farklı ileti gösterilebilir.
+  if (cached?.sourceType === 'email' || /^https:\/\/(mail\.google\.com|outlook\.(live|office|office365)\.com)\//.test(cached?.sourceUrl || '')) {
+    await chrome.storage.session.remove(`summary:tab:${tabId}`);
+    status('E-posta özeti gizlilik amacıyla saklanmaz.');
+    return;
+  }
   const tab = await chrome.tabs.get(tabId).catch(() => null);
   // URL değiştiyse başka belgenin eski özetini göstermeyiz.
   if (cached?.sourceUrl && tab?.url && cached.sourceUrl !== tab.url) {
@@ -138,10 +144,12 @@ async function capture() {
   }
   if (!reply?.ok || !reply.document?.text?.trim()) {
     showDocument(reply?.document || null);
+    $('warn').textContent = (reply?.document?.warnings || []).join('\n');
     throw new Error(reply?.document?.warnings?.[0] || 'SOURCE_UNAVAILABLE: Okunabilir metin bulunamadı.');
   }
   showResult(null);
   showDocument(reply.document);
+  $('warn').textContent = (reply.document.warnings || []).join('\n');
   status(`Kaynak alındı: ${wordCount(reply.document.text)} kelime. Çıkarım yöntemi: ${reply.document.extractionMethod}`);
 }
 async function summarize() {
@@ -174,9 +182,13 @@ async function summarize() {
     };
     if (id !== state.jobId) return;
     showResult(final);
-    await chrome.storage.session.set({ [`summary:tab:${state.tabId}`]: {
-      title: doc.sourceTitle, result: final, sourceUrl: doc.sourceUrl
-    } });
+    if (doc.sourceType === 'email') {
+      await chrome.storage.session.remove(`summary:tab:${state.tabId}`);
+    } else {
+      await chrome.storage.session.set({ [`summary:tab:${state.tabId}`]: {
+        title: doc.sourceTitle, result: final, sourceUrl: doc.sourceUrl, sourceType: doc.sourceType
+      } });
+    }
     if (id === state.jobId) status('Özet tamamlandı. Üretim motoru ve sınırları sonuçta gösteriliyor.');
   } catch (e) {
     if (id === state.jobId) status(`Özetlenemedi: ${errorMessage(e)}`);
@@ -214,6 +226,7 @@ $('engineMode').addEventListener('change',e=>{state.engineMode=e.target.value;})
 $('emailScope').addEventListener('change', () => {
   state.doc = null;
   showResult(null);
+  if (state.tabId !== null) chrome.storage.session.remove(`summary:tab:${state.tabId}`).catch(console.warn);
   status('E-posta kapsamı değişti. Kaynağı yeniden alarak kapsamı doğrulayın.');
 });
 $('inspect').addEventListener('click',()=>{$('inspection').hidden=!$('inspection').hidden});
