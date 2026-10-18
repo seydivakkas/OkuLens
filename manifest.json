@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "OkuLens",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "minimum_chrome_version": "116",
   "description": "Makale, e-posta ve YouTube içeriğinde hibrit yerel NLP ve koşullu yerleşik AI ile gizlilik odaklı özetleme.",
   "permissions": [
