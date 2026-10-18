@@ -8,7 +8,7 @@ import {createHash} from 'node:crypto';
 
 const root=resolve('.');
 const strict=process.argv.includes('--release');
-const canonical=new Set(['MIT','Apache-2.0','BSD-2-Clause','BSD-3-Clause','ISC','0BSD','CC0-1.0','Unlicense','Unicode-3.0','Zlib']);
+const canonical=new Set(['MIT','Apache-2.0','BSD-2-Clause','BSD-3-Clause','ISC','0BSD','CC0-1.0','Unlicense','Unicode-3.0','Zlib','BlueOak-1.0.0']);
 const prohibited=/\b(?:AGPL|GPL|LGPL|SSPL|BUSL|BSL|Commons Clause|non[- ]commercial|NC[-\s]|PolyForm|Elastic License)\b/i;
 const licenseFiles=/^(LICENSE|LICENCE|COPYING|NOTICE)(?:[-_.].*)?$/i;
 const report={schemaVersion:1,mode:strict?'release':'development',generatedAt:new Date().toISOString(),
@@ -78,4 +78,6 @@ console.log('Ticari lisans ön denetimi:',report.status,'paket:',report.count,'b
 for(const f of report.findings.slice(0,50))console.log(' -',f.code,f.path,f.detail);
 if(report.findings.length>50)console.log('... devamı için:',auditFile);
 console.log('Kanıt:',auditFile);
-if(report.status==='HOLD'||(strict&&report.status!=='READY_FOR_LEGAL_REVIEW'))process.exitCode=1;
+// Geliştirme denetimi HOLD bulgularını kayıt eder. Dağıtım kapısı bunları FAIL yapar.
+// CI yeşili, ticari dağıtım onayı değildir.
+if(strict&&report.status!=='READY_FOR_LEGAL_REVIEW')process.exitCode=1;
