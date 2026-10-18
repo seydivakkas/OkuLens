@@ -29,4 +29,6 @@ Ayrı bir kapalı kaynak/çift lisanslı ürün için katkı verenlerin telif ve
 - [ ] Güvenlik/kişisel veri kapsamı güncellendi.
 - [ ] Gerçek kabul olmadan PASS yazılmadı.
 
-Ana referans: [Ticari Kullanım Politikası](docs/TICARI_KULLANIM_POLITIKASI.md).
+Ana referanslar: [Ticari Kullanım Politikası](docs/TICARI_KULLANIM_POLITIKASI.md) ve [TİCARİ-001 Ürün ve Lisans Stratejisi](docs/TICARI_001_URUN_VE_LISANS_STRATEJISI.md).
+
+Yeni Pro/Business kodunun telif sahipliği ve lisansına dair yazılı dayanak belirlenmeden kapalı kaynak ürün adına dış katkı kabul edilmez; mevcut MIT katkı hakları geriye dönük değiştirilmez.
