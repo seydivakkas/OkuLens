@@ -987,6 +987,7 @@ npm test
 Ticari sürüm kapısı: `npm run commercial:release-check` (**şu anda bilinçli olarak HOLD/FAIL**). Geliştirme CI'ının yeşil olması ticari yayın onayı değildir.
 
 Ticari uygunluk dosyaları:
+- [TİCARİ-001 — Ürün, kod sahipliği ve Free/Pro/Business lisans stratejisi](docs/TICARI_001_URUN_VE_LISANS_STRATEJISI.md)
 - [Ticari kullanım politikası ve lisans envanteri](docs/TICARI_KULLANIM_POLITIKASI.md)
 - [Gizlilik politikası — yayımlanmamış taslak](docs/GIZLILIK_POLITIKASI_TASLAK.md)
 - [Üçüncü taraf model ve runtime kayıtları](docs/THIRD_PARTY_MODELS.md)
