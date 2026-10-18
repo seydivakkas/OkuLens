@@ -70,3 +70,46 @@ export function runLocalModel(request,{signal,onProgress=()=>{},workerFactory=()
   }catch(e){finish(e);}
  });
 }
+
+
+/** Gerçek tarayıcı Worker'ında OPFS URL/cache eşleşmesini sınar.
+ * 648MB ağırlığı modele yüklemez ve gerçek inference PASS olarak dönmez.
+ */
+export function preflightLocalModel({
+ signal,onProgress=()=>{},
+ workerFactory=()=>new Worker(new URL('../worker/local-model-worker.mjs',import.meta.url),{type:'module'}),
+ getURL=path=>chrome.runtime.getURL(path),
+ findBrowserModel=()=>browserModelStatus()
+}={}){
+ return new Promise((resolve,reject)=>{
+  if(signal?.aborted){reject(failure('AbortError'));return;}
+  let worker,finished=false;
+  const jobId=Date.now()+Math.floor(Math.random()*100000);
+  const stop=(error,result)=>{
+   if(finished)return;
+   finished=true;
+   signal?.removeEventListener('abort',abort);
+   worker?.terminate();
+   if(error)reject(error);else resolve(result);
+  };
+  const abort=()=>stop(failure('AbortError'));
+  try{
+   worker=workerFactory();
+   signal?.addEventListener('abort',abort,{once:true});
+   worker.onerror=e=>stop(failure('PREFLIGHT_WORKER_ERROR: '+(e.message||'Worker yüklenemedi')));
+   worker.onmessage=e=>{
+    const m=e.data;
+    if(m?.jobId!==jobId||finished)return;
+    if(m.type==='loading')onProgress(m);
+    if(m.type==='preflight')stop(null,m.result);
+    if(m.type==='error')stop(failure(m.code||'PREFLIGHT_ERROR'));
+   };
+   Promise.resolve().then(findBrowserModel).then(state=>{
+    if(finished)return;
+    if(!state?.ready||!state.record)throw failure('BROWSER_OPFS_MODEL_NOT_INSTALLED');
+    worker.postMessage({jobId,type:'PREFLIGHT',browserRecord:state.record,
+     urls:{modelBase:getURL('models/'),wasmBase:getURL('vendor/ort/')}});
+   }).catch(e=>stop(e));
+  }catch(e){stop(e);}
+ });
+}

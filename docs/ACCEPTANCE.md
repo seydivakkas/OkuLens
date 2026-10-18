@@ -20,6 +20,16 @@ Durum sözcükleri: `PASS` kanıtlı gerçek kabul; `PARTIAL` kapsam sınırlı;
 - [x] Gmail/Outlook/YouTube ayırıcıları için sentetik birim testleri.
 - [ ] Unit + e2e tarayıcı testleri (gerçek tarayıcı).
 
+## İşlem 004-D — OPFS Worker Dosya/URL Ön Kontrolü
+
+- [x] Yalnız paket içi model dosyalarını beyaz listeleyen, HTTP(S) uzak fetch'i engelleyen customCache adaptörü kodlandı.
+- [x] OPFS Worker ön testi, iptal, ayrıntılı hata ve kullanıcı tarafından indirilen HOLD JSON kanıtı kodlandı.
+- [x] Cache URL ve Worker taklit testleri eklendi.
+- [ ] Chrome/Edge gerçek OPFS Worker ön testinin başarılı sonucuyla doğrulanması (**HOLD**).
+- [ ] OPFS → Transformers.js tam model yükleme, gerçek internet kapalı Türkçe 10/100/1000 üretim, streaming, RAM/VRAM, bağımsız kaynak sadakati (**HOLD**).
+
+[İşlem 004-D mühendislik belgesi](ISLEM_004D_OPFS_WORKER_PREFLIGHT.md)
+
 ## İşlem 004-C — CDN, Metadata, OPFS kurtarma
 
 - [x] Dokuz upstream metadata dosyası sabit revizyondan Linux GitHub Actions ile indirilip SHA-256 pinlendi.

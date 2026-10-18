@@ -1,11 +1,14 @@
 import {CASES,fixtureSource,buildEvidence,preflightFidelity} from '../shared/acceptance-evidence.mjs';
-import {localModelStatus,runLocalModel} from '../shared/local-model-bridge.mjs';
+import {localModelStatus,runLocalModel,preflightLocalModel} from '../shared/local-model-bridge.mjs';
+import {browserModelStatus} from '../shared/browser-model-store.mjs';
 import {wordCount} from '../shared/summarize.mjs';
 
 const $=id=>document.getElementById(id);
 let active=null;
 let record=null;
 let modelInfo={ready:false};
+let browserReady=false;
+let lastPreflight=null;
 const formatMs=n=>Number.isFinite(n)?Math.round(n)+' ms':'Ölçülmedi';
 const formatMB=n=>Number.isFinite(n)?(n/1048576).toFixed(1)+' MB':'Ölçülmedi';
 function heap(){
@@ -28,7 +31,10 @@ function resetCase(){
  record=null;
 }
 async function checkModel(){
- modelInfo=await localModelStatus();
+ const [status,browser]=await Promise.all([localModelStatus(),browserModelStatus()]);
+ modelInfo=status;
+ browserReady=browser.ready;
+ $('preflight').disabled=!browserReady;
  $('model-status').textContent=modelInfo.ready
   ?'Kurulum manifesti bulundu ('+(modelInfo.backends||[]).join('/')+'). SHA doğrulaması ve gerçek inference ayrıca gereklidir.'
   :'Kurulu model manifesti bulunmadı. Önce README içindeki açık onaylı model kurulumunu ve SHA kontrolünü yapın.';
@@ -45,6 +51,7 @@ function review(){
 }
 function setBusy(value){
  $('run').disabled=value||!modelInfo.ready;
+ $('preflight').disabled=value||!browserReady;
  $('cancel').disabled=!value;
  $('case').disabled=value;
  $('backend').disabled=value;
@@ -127,6 +134,32 @@ async function begin(){
   $('download').disabled=false;
  }
 }
+async function beginPreflight(){
+ if(active||!browserReady)return;
+ const controller=new AbortController();
+ active={controller};
+ setBusy(true);
+ lastPreflight=null;
+ $('preflight-download').disabled=true;
+ $('preflight-result').textContent='OPFS dosyaları gerçek uzantı Worker’ında okunuyor. Model çıkarımı başlatılmıyor…';
+ $('run-status').textContent='OPFS Worker ön kontrolü çalışıyor.';
+ try{
+  const result=await preflightLocalModel({signal:controller.signal});
+  lastPreflight={schemaVersion:1,kind:'OKULENS_OPFS_WORKER_PREFLIGHT',
+   observedAt:new Date().toISOString(),browserUserAgent:navigator.userAgent,
+   result,networkCaptureStatus:'NOT_MEASURED',realModelInferenceVerified:false,
+   decision:'HOLD'};
+  $('preflight-download').disabled=false;
+  $('preflight-result').textContent=JSON.stringify(result,null,2);
+  $('run-status').textContent='OPFS Worker dosya ön kontrolü tamamlandı. Gerçek ONNX üretimi / çevrimdışı çalışma hâlâ HOLD.';
+ }catch(error){
+  $('preflight-result').textContent='OPFS ön kontrol HATA: '+String(error?.message||error);
+  $('run-status').textContent='Ön kontrol başarısız: model çalışıyor varsayılmayacak.';
+ }finally{
+  active=null;
+  setBusy(false);
+ }
+}
 function download(){
  if(!record)return;
  const report=buildEvidence({...record,review:review()});
@@ -151,6 +184,17 @@ function download(){
  $('run-status').textContent='JSON raporu yerel olarak indirildi. Issue #4 hâlâ HOLD.';
 }
 $('case').addEventListener('change',resetCase);
+$('preflight').addEventListener('click',()=>beginPreflight());
+$('preflight-download').addEventListener('click',()=>{
+ if(!lastPreflight)return;
+ const bytes=new Blob([JSON.stringify(lastPreflight,null,2)+'\n'],{type:'application/json'});
+ const url=URL.createObjectURL(bytes),a=document.createElement('a');
+ a.href=url;
+ a.download='okulens-islem004d-opfs-onkontrol-'+new Date().toISOString().slice(0,10)+'.json';
+ a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+
 $('run').addEventListener('click',()=>begin().catch(e=>{$('run-status').textContent='LAB_ERROR: '+(e.message||e);}));
 $('cancel').addEventListener('click',()=>active?.controller.abort());
 $('download').addEventListener('click',download);

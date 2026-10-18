@@ -1019,3 +1019,12 @@ Uzantının **Ayarlar → Tarayıcıda model yönetimi** bölümünde kullanıc�
 [İşlem 004-C kanıt raporu](docs/ISLEM_004C_CDN_METADATA_OPFS_RECOVERY.md). Sabit Qwen3 model commitindeki **9 metadata dosyası** GitHub Actions ortamında gerçekten indirilerek SHA-256 doğrulamasına alındı. WebGPU (648449396 bayt) ve WASM (996522744 bayt) ağırlıklarının yalnızca **HTTP HEAD** yönlendirmeleri kontrol edildi; ikisinin de son hostu `us.aws.cdn.hf.co`. Bu gerçek Windows Chrome/Edge indirme/ONNX kabulü değildir.
 
 Ayarlar ekranında artık sahipsiz OPFS model klasörlerini önce **kuru taramayla** listeleyen, ancak kullanıcı tekrar onaylarsa silen kurtarma alanı bulunuyor. Aktif model dosyaları korunur. Model indirme kimlik bilgisi ve referrer içermeyecek biçimde güncellendi; dar ve gözlenmiş CDN host izni opsiyoneldir. Çevrimdışı üretim, kaynak sadakati, VRAM ve ticari yayın **HOLD**.
+
+
+---
+
+## İşlem 004-D — OPFS Worker Ön Kontrolü
+
+[İşlem 004-D teknik sözleşmesi](docs/ISLEM_004D_OPFS_WORKER_PREFLIGHT.md) kapsamında ONNX dosyalarının tarayıcı OPFS deposundan okunabildiğini üretken model başlatmadan sınayan bir Worker ön test düzeneği eklendi. Kaynak URL'leri aynı uzantı kimliği, sabit model ID'si ve manifestteki beyaz liste ile sınırlandırılıyor; HTTP(S) ile uzaktan model getirme reddediliyor. Studio → Gerçek Model Kabul Laboratuvarı içinde **OPFS model dosyalarını Worker içinde ön denetle** komutu ve kullanıcı isteğiyle indirilebilen, gerçek üretimi onaylamayan JSON kayıt mevcut.
+
+**Sınır:** Ön test gerçek Chrome/Edge'de henüz çalıştırılmadı. Model ağırlıklarının Transformers.js tarafından gerçekten yüklenmesi, internet kapalı Türkçe üretim, streaming, RAM/VRAM ve bağımsız kaynak doğruluğu **HOLD**. Issue #4 ve ticari yayımlama kapatılamaz.

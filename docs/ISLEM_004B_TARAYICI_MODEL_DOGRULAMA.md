@@ -109,3 +109,10 @@ Linux Chromium veya Node birim testi Windows Chrome/Edge kabulünün yerine geç
 ## Ek: İşlem 004-C bulgusu (18.10.2026)
 
 [İşlem 004-C](ISLEM_004C_CDN_METADATA_OPFS_RECOVERY.md) kapsamında dokuz metadata dosyasının SHA-256'sı bağımsız GitHub Actions indirmesinde hesaplanarak kataloğa pinlendi. WebGPU ve WASM ağırlıkları **indirilmeden**, HEAD ile `us.aws.cdn.hf.co` yönlendirmesi gözlendi. Bu host için kullanıcı isteğiyle verilen dar opsiyonel izin kodlandı. Sahipsiz OPFS model kurulumlarını kuru tarayan/onaylı temizleyen kod ve sentetik testler eklendi. Bunlar bu belgedeki Windows Chrome/Edge, gerçek yükleme ve çevrimdışı model kabul kapılarını **kapatmaz**.
+
+
+## Ek: İşlem 004-D Worker dosya ön testi (18.10.2026)
+
+[İşlem 004-D](ISLEM_004D_OPFS_WORKER_PREFLIGHT.md) kapsamında URL beyaz liste/customCache adaptörü ve OPFS model dosyalarını gerçek uzantı Worker'ında okumaya yönelik PRECHECK düzeneği geliştirildi. Tarayıcıda ön test için Studio → Gerçek Model Kabul Laboratuvarı üzerinden OPFS dosyalarını kontrol et düğmesi kullanılacak; kullanıcıya ayrı HOLD JSON raporu sunulacak.
+
+**Ön kontrolün başarısı, Transformers.js/ONNX'in gerçek Türkçe çıktı oluşturduğu, internet kapalı çalıştığı, VRAM'in yeterli olduğu veya kaynak sadakatinin kabul edildiği anlamına gelmez.** Bu belgedeki A05–A09 kapıları açık kalır.

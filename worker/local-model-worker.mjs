@@ -4,6 +4,7 @@
 import {createGenerationPlan,runGenerativePlan} from '../shared/generative-plan.mjs';
 import {browserModelStatus,openBrowserModelResponse} from '../shared/browser-model-store.mjs';
 import {STORE_KEY} from '../shared/browser-model-catalog.mjs';
+import {createLocalModelCache} from '../shared/local-model-response-cache.mjs';
 const ID='onnx-community/Qwen3-0.6B-Instruct-ONNX';
 const WEIGHT_SHAS={
  'onnx/model_q4f16.onnx':'4ad5a67d818b55749eb4cad425ca542a7aa9ea66eba11a0d31ab6b81f35a182d',
@@ -48,37 +49,18 @@ async function prepare(urls,preference,jobId,browserRecord){
  env.localModelPath=urls.modelBase;
  env.useBrowserCache=false;
  if(browserDeps){
-  // Version 3.8.1 customCache arayüzü: match/put.
-  // Yerel URL aynı prefixe denk gelirse yalnızca doğrulanmış OPFS dosyası okunur.
-  const prefix=urls.modelBase+ID+'/';
-  const read=async input=>{
-   const address=typeof input==='string'?input:input?.url;
-   if(typeof address!=='string'||!address.startsWith(prefix))return undefined;
-   const path=decodeURIComponent(address.slice(prefix.length).split('?')[0]);
-   try{return await openBrowserModelResponse(path,{deps:browserDeps});}
-   catch{return undefined;}
-  };
+  // Uzantının OPFS manifestindeki dosyalarla sınırlı, gözlemlenebilir cache.
+  // Metadata/ONNX URL eşleşmesi yoksa yerel dosya varmış gibi davranma.
+  const adapter=createLocalModelCache({
+   modelBase:urls.modelBase,modelId:ID,
+   allowedPaths:browserRecord.files.map(x=>x.path),
+   loadFile:relative=>openBrowserModelResponse(relative,{deps:browserDeps}),
+   onEvent:event=>notify(jobId,'loading',{stage:'OPFS_FILE_READ',path:event.path})
+  });
   env.useCustomCache=true;
-  env.customCache={match:read,async put(){throw new Error('REMOTE_MODEL_CACHE_DISABLED');}};
-  // Transformers.js 3.8.1'in önce fetch sonra custom cache deneme ihtimali
-  // için yalnızca yerel URL'leri OPFS Response'a yönlendir; diğer URL'ler
-  // orijinal fetch ile kalır. Gerçek runtime uyumluluğu HOLD.
+  env.customCache=adapter.customCache;
   const originalFetch=globalThis.fetch.bind(globalThis);
-  globalThis.fetch=async(input,options)=>{
-   const url=typeof input==='string'?input:input?.url;
-   if(typeof url==='string'&&url.startsWith(prefix)){
-    const response=await read(url);
-    if(!response)throw new Error('BROWSER_OPFS_FILE_MISSING');
-    return response;
-   }
-   // Üretim sırasında Worker'ın HTTP(S) isteğine çıkması kesin engel:
-   // OPFS modeli ve paketli WASM uzantı origin'inden yüklenmelidir.
-   const resolved=new URL(String(url||''),self.location.href);
-   if(resolved.protocol==='https:'||resolved.protocol==='http:'){
-    throw new Error('RUNTIME_REMOTE_FETCH_FORBIDDEN');
-   }
-   return originalFetch(input,options);
-  };
+  globalThis.fetch=(input,options)=>adapter.guardedFetch(input,options,originalFetch);
  }else{
   env.useCustomCache=false;env.customCache=null;
  }
@@ -92,6 +74,47 @@ async function prepare(urls,preference,jobId,browserRecord){
  });
  loadedBackend=selected;
  return {selected,manifest};
+}
+async function preflight(message){
+ const {jobId,urls,browserRecord}=message;
+ if(!browserRecord)throw new Error('BROWSER_OPFS_MODEL_NOT_INSTALLED');
+ const deps={storage:navigator.storage,local:{get:async()=>({[STORE_KEY]:browserRecord})}};
+ const status=await browserModelStatus(deps);
+ if(!status.ready)throw new Error('BROWSER_OPFS_MODEL_UNAVAILABLE: '+status.reason);
+ const paths=browserRecord.files.map(x=>x.path);
+ let sampledBytes=0;
+ const adapter=createLocalModelCache({
+  modelBase:urls.modelBase,modelId:ID,allowedPaths:paths,
+  loadFile:relative=>openBrowserModelResponse(relative,{deps})
+ });
+ // Dosyaların kullanıcı profili OPFS alanından gerçekten okunabilir olup olmadığını
+ // Worker içinde sınar; ağır ONNX dosyasını belleğe almaz veya model başlatmaz.
+ for(const path of paths){
+  const key=adapter.modelPrefix+path;
+  const result=await adapter.customCache.match(key);
+  if(!result?.ok)throw new Error('PREFLIGHT_MODEL_RESPONSE_INVALID: '+path);
+  const expected=browserRecord.files.find(x=>x.path===path);
+  const size=Number(result.headers.get('Content-Length'));
+  if(size!==expected.bytes)throw new Error('PREFLIGHT_MODEL_FILE_SIZE_MISMATCH: '+path);
+  // Sadece dosya handle'ı değil, gerçek OPFS Response akışı da okunabilmeli.
+  // Dev ONNX ağırlığını tamamıyla belleğe almadan ilk parçası örneklenir.
+  const reader=result.body?.getReader();
+  if(!reader)throw new Error('PREFLIGHT_MODEL_STREAM_UNAVAILABLE: '+path);
+  try{
+   const first=await reader.read();
+   if(first.done||!first.value?.byteLength)throw new Error('PREFLIGHT_MODEL_STREAM_EMPTY: '+path);
+   sampledBytes+=first.value.byteLength;
+  }finally{
+   await reader.cancel().catch(()=>{});
+   reader.releaseLock();
+  }
+ }
+ notify(jobId,'preflight',{
+  result:{stage:'PREFLIGHT_FILES_READABLE',modelId:ID,revision:browserRecord.revision,
+   backend:status.backend,checkedFiles:paths.length,bytes:status.totalBytes,sampledBytes,
+   opfsCacheLookups:adapter.stats.lookups,opfsCacheHits:adapter.stats.hits,
+   note:'Gerçek ONNX inference, model SHA tekrar hesaplama veya ağsız çalışma kanıtı DEĞİL.'}
+ });
 }
 async function run(message){
  const {jobId,urls,preference,request}=message;
@@ -129,7 +152,10 @@ async function run(message){
 }
 self.onmessage=event=>{
  const m=event.data;
- if(m?.type==='GENERATE'&&Number.isInteger(m.jobId)&&m.urls&&m.request){
+ if(!Number.isInteger(m?.jobId)||!m.urls)return;
+ if(m.type==='GENERATE'&&m.request){
   run(m).catch(e=>notify(m.jobId,'error',{code:String(e?.message||e)}));
+ }else if(m.type==='PREFLIGHT'){
+  preflight(m).catch(e=>notify(m.jobId,'error',{code:String(e?.message||e)}));
  }
 };
