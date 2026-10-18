@@ -1,15 +1,23 @@
 {
   "name": "okulens",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "OkuLens MV3 hibrit yan panel, NLP stüdyosu ve yerel-öncelikli özetleme",
   "type": "module",
   "scripts": {
-    "check": "node --check background/service-worker.js && node --check content/injected.js && node --check panel/panel.js && node --check options/options.js && node --check shared/summarize.mjs && node --check shared/native-ai.mjs && node --check studio/studio.js && node --check shared/hybrid-nlp.mjs && node --check content/article-extractor.js && node --check vendor/readability/Readability.js && node --check content/email-extractor.js && node --check content/youtube-extractor.js && node --check content/spa-monitor.js",
-    "test": "node --test tests/*.test.mjs"
+    "check": "node --check background/service-worker.js && node --check content/injected.js && node --check panel/panel.js && node --check options/options.js && node --check shared/summarize.mjs && node --check shared/native-ai.mjs && node --check studio/studio.js && node --check shared/hybrid-nlp.mjs && node --check content/article-extractor.js && node --check vendor/readability/Readability.js && node --check content/email-extractor.js && node --check content/youtube-extractor.js && node --check content/spa-monitor.js && node --check shared/generative-plan.mjs && node --check shared/local-model-bridge.mjs && node --check worker/local-model-worker.mjs && node --check scripts/local-model.mjs && node --check scripts/build-runtime.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "build:runtime": "node scripts/build-runtime.mjs",
+    "model:install": "node scripts/local-model.mjs",
+    "model:verify": "node scripts/local-model.mjs --verify",
+    "model:remove": "node scripts/local-model.mjs --remove"
   },
   "engines": {
     "node": ">=20"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@huggingface/transformers": "3.8.1",
+    "esbuild": "0.25.12"
+  }
 }
