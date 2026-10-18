@@ -5,6 +5,7 @@
 import {existsSync,readFileSync,readdirSync,mkdirSync,writeFileSync,copyFileSync} from 'node:fs';
 import {join,resolve,relative} from 'node:path';
 import {createHash} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
 
 const root=resolve('.');
 const strict=process.argv.includes('--release');
@@ -78,6 +79,15 @@ function inspect(dir,seen){
  scan(join(dir,'node_modules'),seen);
 }
 const own=json(join(root,'package.json'));
+if(strict){
+ // npm install yerel ve git dışı lockfile oluşturabilir; ticari tekrarlanabilir
+ // sürüm için gerçek sürüm kontrolünde paket-lock bulunmasını şart koş.
+ const tracked=spawnSync('git',['ls-files','--error-unmatch','package-lock.json'],{
+  cwd:root,encoding:'utf8',windowsHide:true
+ });
+ if(!existsSync(join(root,'package-lock.json'))||tracked.status!==0)
+  finding('LOCKFILE_NOT_VERSIONED','package-lock.json','Yayın için package-lock.json depoya commit edilmeli; npm ci kullanılmalı.');
+}
 if(own.license!=='MIT')finding('OWN_LICENSE_CHANGED','package.json','Mevcut MIT lisans sözleşmesi değişti; sahibin kararı ve belge güncellemesi gerekli');
 for(const required of ['LICENSE','vendor/readability/LICENSE.md','vendor/readability/NOTICE','vendor/licenses/onnxruntime-MIT.txt',
  'docs/THIRD_PARTY_MODELS.md','docs/TICARI_KULLANIM_POLITIKASI.md','docs/GIZLILIK_POLITIKASI_TASLAK.md']){
@@ -89,7 +99,7 @@ if(!bundleInputs)finding('RUNTIME_BUNDLE_INVENTORY_MISSING','vendor/runtime-inpu
 else scan(join(root,'node_modules'));
 report.packages.sort((a,b)=>a.name.localeCompare(b.name)||String(a.version).localeCompare(String(b.version)));
 report.count=report.packages.length;
-const blocking=new Set(['LICENSE_UNKNOWN','LICENSE_REVIEW','REQUIRED_NOTICE_MISSING','OWN_LICENSE_CHANGED','INVALID_PACKAGE_JSON','DEPENDENCY_TREE_MISSING','RUNTIME_BUNDLE_INVENTORY_MISSING']);
+const blocking=new Set(['LICENSE_UNKNOWN','LICENSE_REVIEW','REQUIRED_NOTICE_MISSING','OWN_LICENSE_CHANGED','INVALID_PACKAGE_JSON','DEPENDENCY_TREE_MISSING','RUNTIME_BUNDLE_INVENTORY_MISSING','LOCKFILE_NOT_VERSIONED']);
 report.status=report.findings.some(f=>blocking.has(f.code))?'HOLD':(report.findings.some(f=>f.code==='LICENSE_NOTICE_MISSING')?'PARTIAL':'READY_FOR_LEGAL_REVIEW');
 const outputDir=join(root,'build','ticari-uygunluk');
 mkdirSync(outputDir,{recursive:true});
