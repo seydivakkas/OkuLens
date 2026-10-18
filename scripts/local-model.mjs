@@ -15,7 +15,7 @@ export const WEIGHTS={
  webgpu:{file:'onnx/model_q4f16.onnx',sha256:'4ad5a67d818b55749eb4cad425ca542a7aa9ea66eba11a0d31ab6b81f35a182d'},
  wasm:{file:'onnx/model_q4.onnx',sha256:'a1efc0c2ec91473bcd8cd27b2a25d50452252eac5a5d582722cbdc7d8e11f13d'}
 };
-const META=['config.json','tokenizer.json','tokenizer_config.json','generation_config.json','special_tokens_map.json','added_tokens.json'];
+const META=['config.json','tokenizer.json','tokenizer_config.json','generation_config.json','special_tokens_map.json','added_tokens.json','vocab.json','merges.txt','chat_template.jinja'];
 const root=path.resolve('models');
 const base=path.join(root,...MODEL_ID.split('/'));
 function shaFile(file){
