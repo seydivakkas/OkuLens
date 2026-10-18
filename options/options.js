@@ -27,6 +27,7 @@ refreshModel().catch(()=>{document.getElementById('modelStatus').textContent='Mo
 
 // TİCARİ-002: kullanıcı onayı olmadan model indirimi başlatılmaz.
 import {MODEL} from '../shared/browser-model-catalog.mjs';
+import {inspectModelOrphans,cleanupModelOrphans} from '../shared/opfs-model-recovery.mjs';
 import {browserModelStatus,quotaInfo,installBrowserModel,verifyBrowserModel,removeBrowserModel}
   from '../shared/browser-model-store.mjs';
 let browserTask=null;
@@ -35,6 +36,8 @@ function setBrowserBusy(active){
  el('browserInstall').disabled=active;
  el('browserVerify').disabled=active;
  el('browserRemove').disabled=active;
+ el('browserOrphans').disabled=active;
+ el('browserCleanOrphans').disabled=true;
  el('browserBackend').disabled=active;
  el('browserAbort').disabled=!active;
 }
@@ -74,6 +77,10 @@ el('browserInstall').addEventListener('click',async()=>{
   const result=await installBrowserModel(backend,{
    signal:controller.signal,
    onProgress(event){
+    if(event.stage==='cdn-host'){
+     el('browserProgressDetail').textContent='CDN yanıtı: '+event.host+' · '+event.path+
+       '. Chrome/Edge CORS kabulü ayrıca doğrulanmalı.';return;
+    }
     const n=event.totalFiles||1;
     el('browserProgress').value=Math.floor((event.index-(event.stage==='verified'?0:1))/n*100);
     el('browserProgressDetail').textContent=
@@ -119,4 +126,29 @@ el('browserRemove').addEventListener('click',async()=>{
 });
 refreshBrowserModel().catch(e=>{
  el('browserModelStatus').textContent='Tarayıcı model durumu okunamadı: '+String(e.message||e);
+});
+
+let lastOrphanCount=0;
+el('browserOrphans').addEventListener('click',async()=>{
+ if(browserTask)return;
+ el('browserCleanOrphans').disabled=true;
+ try{
+  const result=await inspectModelOrphans();
+  lastOrphanCount=result.orphanCount;
+  el('browserOrphanStatus').textContent=result.orphanCount+' sahipsiz kurulum adayı · yaklaşık '+
+   (result.reclaimableBytes/1048576).toFixed(1)+' MiB. Aktif manifest korunacak. '+result.unknownCount+
+   ' bilinmeyen klasöre dokunulmayacak.';
+  el('browserCleanOrphans').disabled=result.orphanCount===0;
+ }catch(e){el('browserOrphanStatus').textContent='Tarama başarısız: '+String(e.message||e);}
+});
+el('browserCleanOrphans').addEventListener('click',async()=>{
+ if(browserTask||lastOrphanCount===0)return;
+ if(!window.confirm('Aktif model dışındaki '+lastOrphanCount+' sahipsiz kurulum klasörü silinsin mi? Geri alınamaz.'))return;
+ setBrowserBusy(true);
+ try{
+  const result=await cleanupModelOrphans({confirmed:true});
+  lastOrphanCount=0;
+  el('browserOrphanStatus').textContent=result.removedCount+' sahipsiz klasör kaldırıldı. Aktif model manifesti değiştirilmedi.';
+ }catch(e){el('browserOrphanStatus').textContent='Temizleme başarısız: '+String(e.message||e);}
+ finally{setBrowserBusy(false);await refreshBrowserModel().catch(()=>{});}
 });
