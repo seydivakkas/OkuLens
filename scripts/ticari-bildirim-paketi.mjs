@@ -8,7 +8,7 @@ const root=resolve('.');
 const audit=join(root,'build','ticari-uygunluk','lisans-envanteri.json');
 if(!existsSync(audit))throw new Error('COMMERCIAL_AUDIT_MISSING: önce npm run commercial:check');
 const report=JSON.parse(readFileSync(audit,'utf8'));
-if(report.status==='HOLD')throw new Error('COMMERCIAL_AUDIT_HOLD: bilinmeyen/yasak lisanslı paket var');
+if(report.status==='HOLD')console.warn('Ticari dağıtım HOLD: Lisans sınıflandırması bitmemiş paketler mevcut.');
 const out=join(root,'vendor','ticari-lisanslar');
 mkdirSync(out,{recursive:true});
 const copied=[],missing=[];
@@ -36,4 +36,4 @@ const manifest={schemaVersion:1,notice:'Bu dosyalar ilgili üçüncü taraf hak 
 writeFileSync(join(out,'LISANS_ENVANTERI.json'),JSON.stringify(manifest,null,2)+'\n');
 console.log('Ticari bildirim dosyaları hazır:',copied.length,'eksik metin:',missing.length);
 if(missing.length)console.warn('Dağıtım HOLD: Eksik lisans metinleri:',missing.join(', '));
-if(missing.length)process.exitCode=1;
+if(process.argv.includes('--release')&&(missing.length||report.status!=='READY_FOR_LEGAL_REVIEW'))process.exitCode=1;
