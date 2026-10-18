@@ -5,7 +5,7 @@
 
 ## Gizlilik ve kullanıcı kararı
 
-Gmail/Outlook mesajları, kullanıcı açıkça "Kaynağı al" veya "Özetle" eylemine bastığında aktif sekmedeki görünür DOM'dan alınır. Uzantı, uzak Gmail/Outlook API'lerine veya LLM servisine bağlanmaz. Alıcı alanları, e-posta adresleri, ekler ve kapalı mesajlar kasıtlı olarak aktarılmaz. Kaynak işleme kaydı yalnızca yan panel belleğinde tutulur; özetin sekme bazlı oturum önbelleğinde saklanması mevcut projedeki davranıştır.
+Gmail/Outlook mesajları, kullanıcı açıkça "Kaynağı al" veya "Özetle" eylemine bastığında aktif sekmedeki görünür DOM'dan alınır. Uzantı, uzak Gmail/Outlook API'lerine veya LLM servisine bağlanmaz. Alıcı/gönderen **meta alanları**, ekler ve kapalı mesajlar kasıtlı olarak çıkarılmaz. Gövde metninin içinde bir e-posta adresi geçiyorsa bu hâlâ gövde metninin parçasıdır; otomatik anonimleştirme yapılmaz. E-posta özetleri sekme oturum önbelleğine kaydedilmez; yan panelin geçici belleği kullanılır.
 
 Kapsam seçimi:
 - **Son görünür ileti:** Varsayılan, seçicilerin döndürdüğü son görünür ileti gövdesi. Gmail ve Outlook için "aktif ileti" iddiası DEĞİLDİR; sezgisel sonuç olduğu konusunda uyarı döner.
