@@ -23,7 +23,9 @@ for(const asset of metadata){
     if(bytes>100*1024*1024)throw new Error('METADATA_TOO_LARGE');
    }
   }finally{reader.releaseLock();}
-  result.hashes[asset.path]={sha256:hash.digest('hex'),bytes,
+  const calculated=hash.digest('hex');
+  if(asset.sha256&&calculated!==asset.sha256)throw new Error('METADATA_SHA256_MISMATCH: '+asset.path);
+  result.hashes[asset.path]={sha256:calculated,bytes,
    upstreamUrlHost:new URL(response.url).hostname};
  }finally{clearTimeout(timeout);}
 }
