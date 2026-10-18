@@ -15,3 +15,5 @@ jobs:
           node-version: "22"
       - name: Sabitlenmiş model metadata dosyalarının SHA-256 değerlerini hesapla
         run: node scripts/audit-model-metadata.mjs
+      - name: Büyük ONNX ağırlıklarını indirmeden CDN yönlendirmelerini kontrol et
+        run: node scripts/probe-model-cdn.mjs
