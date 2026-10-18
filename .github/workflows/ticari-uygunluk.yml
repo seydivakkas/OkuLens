@@ -19,6 +19,8 @@ jobs:
           node-version: "22"
       - name: Bağımlılıkları yükle
         run: npm install --no-audit --no-fund
+      - name: Dağıtıma giren yerel runtime girdilerini çıkar
+        run: npm run build:runtime
       - name: Ticari lisans envanteri
         run: npm run commercial:check
       - name: Üçüncü taraf lisans bildirimlerini paketle
