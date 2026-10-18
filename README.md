@@ -994,3 +994,14 @@ Ticari uygunluk dosyaları:
 - [Dış katkı ve telif kökeni kuralları](CONTRIBUTING.md)
 
 **Mevcut riskler:** İlk 56 paketlik npm denetiminde LGPL-3.0-or-later lisanslı opsiyonel yerel paket ve eksik bildirim metinleri tespit edildi. Bunların gerçek tarayıcı uzantı paketine girip girmediği ayrıştırılmadan ücretli dağıtım ilan edilmeyecek. Gmail/Outlook/YouTube platform koşulları, mağaza veri beyanları, model lisans kökeni ve modelin gerçek Windows testi ayrı HOLD maddeleridir.
+
+
+---
+
+## TİCARİ-002 — Chrome/Edge tarayıcısından model kurulumu
+
+[TİCARİ-002 mühendislik belgesi](docs/TICARI_002_MODEL_KURULUM_VE_DEPOLAMA.md) kapsamında, Node.js gerektirmeyen **tarayıcı içi model kurulum adayı** geliştirildi.
+
+Uzantının **Ayarlar → Tarayıcıda model yönetimi** bölümünde kullanıcı WebGPU veya WASM seçer, model kaynağı/lisansı/boyutunu görür, açık onay verir ve yalnız Hugging Face için opsiyonel izin istenir. Dosyalar OPFS uzantı deposuna parça halinde kaydedilir; ONNX ağırlığının upstream SHA-256 değeri ve bütün dosyaların kayıtlı hashleri doğrulanır. Kota, ilerleme, indirme iptali, bütünlüğü yeniden kontrol etme ve model silme seçenekleri vardır. Depolama manifesti tamamlanmamış bir yüklemeyi başarılı göstermez. Eski Node.js geliştirici kurulum yolu korunur.
+
+**Sınır:** Transformers.js Worker'ına OPFS model Response'u sunan adaptör kodlandı; ancak büyük Qwen modelinin gerçek Chrome/Edge tarayıcısında Hugging Face CDN yönlendirmeleriyle indirilmesi, OPFS'ten yüklenmesi, offline Türkçe üretim ve bellek/streaming kabulü henüz doğrulanmadı. Bu özellik geliştirici prototipidir; **Issue #4 ve ticari yayımlama HOLD**.
