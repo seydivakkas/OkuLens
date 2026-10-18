@@ -1,0 +1,29 @@
+name: OkuLens ticari uyumluluk ön denetimi
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - feature/ticari-uygunluk-lisans-ve-gizlilik-kapisi
+  workflow_dispatch:
+jobs:
+  license:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Kaynağı al
+        uses: actions/checkout@v4
+      - name: Node 22 kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Bağımlılıkları yükle
+        run: npm install --no-audit --no-fund
+      - name: Ticari lisans envanteri
+        run: npm run commercial:check
+      - name: Üçüncü taraf lisans bildirimlerini paketle
+        run: npm run commercial:notices
+      - name: Bildirim çıktılarını denetle
+        run: |
+          test -s vendor/ticari-lisanslar/LISANS_ENVANTERI.json
+          test -s build/ticari-uygunluk/lisans-envanteri.json
