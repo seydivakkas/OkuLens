@@ -5,7 +5,7 @@ const read=relative=>readFileSync(new URL(relative,import.meta.url),'utf8');
 const manifest=JSON.parse(read('../manifest.json'));
 test('KVKK gizlilik: bütün sitelerde kalıcı site izni istenmez',()=>{
  assert.equal(manifest.host_permissions,undefined);
- assert.deepEqual(manifest.optional_host_permissions,['https://huggingface.co/*']);
+ assert.deepEqual(manifest.optional_host_permissions,['https://huggingface.co/*','https://us.aws.cdn.hf.co/*']);
  assert.ok(manifest.permissions.includes('activeTab'));
  assert.ok(!manifest.permissions.includes('webRequest'));
  assert.ok(!manifest.permissions.includes('history'));
