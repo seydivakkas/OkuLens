@@ -82,6 +82,7 @@ async function preflight(message){
  const status=await browserModelStatus(deps);
  if(!status.ready)throw new Error('BROWSER_OPFS_MODEL_UNAVAILABLE: '+status.reason);
  const paths=browserRecord.files.map(x=>x.path);
+ let sampledBytes=0;
  const adapter=createLocalModelCache({
   modelBase:urls.modelBase,modelId:ID,allowedPaths:paths,
   loadFile:relative=>openBrowserModelResponse(relative,{deps})
@@ -95,10 +96,22 @@ async function preflight(message){
   const expected=browserRecord.files.find(x=>x.path===path);
   const size=Number(result.headers.get('Content-Length'));
   if(size!==expected.bytes)throw new Error('PREFLIGHT_MODEL_FILE_SIZE_MISMATCH: '+path);
+  // Sadece dosya handle'ı değil, gerçek OPFS Response akışı da okunabilmeli.
+  // Dev ONNX ağırlığını tamamıyla belleğe almadan ilk parçası örneklenir.
+  const reader=result.body?.getReader();
+  if(!reader)throw new Error('PREFLIGHT_MODEL_STREAM_UNAVAILABLE: '+path);
+  try{
+   const first=await reader.read();
+   if(first.done||!first.value?.byteLength)throw new Error('PREFLIGHT_MODEL_STREAM_EMPTY: '+path);
+   sampledBytes+=first.value.byteLength;
+  }finally{
+   await reader.cancel().catch(()=>{});
+   reader.releaseLock();
+  }
  }
  notify(jobId,'preflight',{
   result:{stage:'PREFLIGHT_FILES_READABLE',modelId:ID,revision:browserRecord.revision,
-   backend:status.backend,checkedFiles:paths.length,bytes:status.totalBytes,
+   backend:status.backend,checkedFiles:paths.length,bytes:status.totalBytes,sampledBytes,
    opfsCacheLookups:adapter.stats.lookups,opfsCacheHits:adapter.stats.hits,
    note:'Gerçek ONNX inference, model SHA tekrar hesaplama veya ağsız çalışma kanıtı DEĞİL.'}
  });
