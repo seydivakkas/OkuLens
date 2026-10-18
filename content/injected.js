@@ -21,14 +21,11 @@
     return 'article';
   }
   function extractArticle() {
-    const candidates = [...document.querySelectorAll('article, main, [role="main"]')]
-      .filter(isVisible).map(el => ({ el, length: clean(el.innerText).length }))
-      .sort((a, b) => b.length - a.length);
-    const container = candidates[0]?.el || document.body;
-    // Sayfadaki canlı DOM'u değiştirmeyen metin-only fallback; P1'de Readability klon DOM kullanacak.
-    const clone = container.cloneNode(true);
-    clone.querySelectorAll('script,style,nav,footer,header,form,aside,[aria-hidden="true"],button').forEach(el => el.remove());
-    return clean(clone.textContent).slice(0, MAX_CHARS);
+    if (typeof globalThis.__okulensExtractArticle !== 'function') return {
+      text: '', status: 'unavailable', extractionMethod: 'none',
+      warnings: ['ARTICLE_PARSER_NOT_LOADED: Makale çıkarma modülü yüklenemedi.']
+    };
+    return globalThis.__okulensExtractArticle(document);
   }
   function extractEmail() {
     const selectors = location.hostname.includes('google')
@@ -80,9 +77,12 @@
           ? ['Yalnızca açık transkript panelinde görünür zaman kodları yakalandı.']
           : ['TRANSCRIPT_UNAVAILABLE: Videonun transkript panelini açıp yeniden deneyin.'] };
     }
-    const text = extractArticle();
-    return { ...base, sourceType: 'article', extractionMethod: 'dom-fallback', text,
-      status: text ? 'partial' : 'unavailable', warnings: ['Readability.js henüz eklenmedi; DOM fallback kullanılıyor.'] };
+    const article = extractArticle();
+    return {
+      ...base, ...article, sourceType: 'article',
+      sourceTitle: article.sourceTitle || base.sourceTitle,
+      language: (article.language || base.language).split('-')[0].toLowerCase()
+    };
   }
 
   function ensureBubble() {

@@ -102,7 +102,7 @@ Burada **P0 = paket içindeki kaynak kod**, **Plan = henüz yazılmadı**, **Ko�
 |---|---|---|
 | MV3 manifest / service worker | Chrome + Edge | **P0 kodlandı**, cihazda kabul bekliyor |
 | Side Panel ana ekranı | Sekmeye bağlı kullanım | **P0 kodlandı**, tarayıcıda kabul bekliyor |
-| Makale gövdesi | Readability.js + seçici fallback | **Seçici fallback P0**, Readability paket entegrasyonu **Plan** |
+| Makale gövdesi | Readability.js + seçici fallback | **Readability 0.6.0 + seçici fallback (Issue #2; gerçek tarayıcı HOLD)** |
 | Metin seçimi | Yüzen balon | **P0 deneysel**, kullanıcı açılışıyla etkin |
 | 10/100/1000 hedefleri | Kelime bütçesi ve kaynak uyarısı | **P0 extractive hedefleme**, kesin kelime garantisi yok |
 | Kolay/Orta/Zor | Üretken stil uyarlama | **P0 UI**, gerçek üretken uyarlama **Koşullu/Plan** |
@@ -372,7 +372,7 @@ type NormalizedDocument = {
 - Gürültü: menü, footer, cookie dialog, reklam, iç içe navigasyon, yorum widget'ı.
 - HTML dışa aktarma gerekiyorsa DOMPurify gibi gerçek sanitization; metin-only kullanım tercih edilir.
 - Readability'nin orijinal `document` üzerinde `parse()` yapması DOM'u değiştirebilir; klon kuralı zorunludur.
-- P0'da Readability henüz paketlenmedi; basit seçici fallback vardır. Üçüncü taraf kütüphane eklenirken `npm` bağımlılığı/versiyonu ve lisans kaydı oluşturulacaktır.
+- Readability 0.6.0 `vendor/readability` altında yerel paketlenmiştir; Apache-2.0 lisansı ve NOTICE kayıtlıdır. Gerçek Windows/Chrome/Edge kabulü beklemektedir.
 
 ### Gmail / Outlook — P2
 
@@ -792,7 +792,7 @@ npm test
 | Faz | Çıktı | Bitiş ölçütü | Durum |
 |---|---|---|---|
 | **P0 — Repo ve temel çalışma alanı** | README, manifest, yan panel, çıkarımsal prototip | Dosyalar, statik test, elle yükleme kontrolü | **Kaynak dosyalar bu pakette**, tarayıcı testi bekliyor |
-| **P1 — Article Engine** | Gerçek Readability paketleme, HTML temizleme, kaynak metaverisi | 20+ makale fixture ve DOM güvenliği | Plan |
+| **P1 — Article Engine** | Readability 0.6.0 paketleme, DOM klonu, fallback | Sentetik kontroller mevcut; gerçek tarayıcı kabulü son aşamada | Kısmi |
 | **P2 — Email Extractors** | Gmail/Outlook adaptörleri, scope/cleanup | Mesaj zinciri karmaşası ve alıntı denetimi | Plan |
 | **P3 — YouTube Extractors** | Caption stratejileri, transcript drawer, zaman kodu | TR/EN, ASR/manual, Shorts ve hata senaryosu | Plan |
 | **P4 — Summary Engine** | Chunking, TF-IDF/TextRank opsiyonel, Map-Reduce | Uzun içerik coverage ve kelime ölçümü | Plan |
@@ -915,7 +915,7 @@ Yüklenen AI;DR Manifest V3 uzantı stüdyosu referansı incelendi ve **OkuLens 
 
 **Korunanlar:** mevcut hizmet çalışanı, sayfa içi Shadow DOM balonu, içerik çıkarıcıları, yerleşik AI uygunluk denetimi ve ayarlar altyapısı.
 
-**Henüz yok:** üretken Türkçe ONNX/WebGPU modeli, doğrulanmış Readability, Gmail/Outlook/YouTube tam kapsama, bütün sitelerde ilk seçimde otomatik balon, bağımsız gerçek tarayıcı cihaz kabulü. Teknik mimari matrisi ve sonraki işler: [docs/HYBRID_INTERFACE.md](docs/HYBRID_INTERFACE.md).
+**Henüz yok:** üretken Türkçe ONNX/WebGPU modeli, gerçek tarayıcıda doğrulanmış Readability, Gmail/Outlook/YouTube tam kapsama, bütün sitelerde ilk seçimde otomatik balon, bağımsız gerçek tarayıcı cihaz kabulü. Teknik mimari matrisi ve sonraki işler: [docs/HYBRID_INTERFACE.md](docs/HYBRID_INTERFACE.md).
 
 ### Simülatörü açma
 

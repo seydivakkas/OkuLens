@@ -8,7 +8,8 @@ Durum sözcükleri: `PASS` kanıtlı gerçek kabul; `PARTIAL` kapsam sınırlı;
 - [x] JavaScript modülleri Node `--check` ile sözdizimi taramasından geçti.
 - [x] Extractive motorunun 7 adet saf fonksiyon testi yerel ortamda geçti (18.10.2026).
 - [x] Uzaktan LLM API istemcisi kaynak kodunda yok.
-- [ ] Readability.js lisanslı paket entegrasyonu.
+- [x] Readability.js 0.6.0 paket entegrasyonu (kod + sentetik kontrol).
+- [ ] Canlı makale sitelerinde gerçek Chrome/Edge doğrulaması (son kabul).
 - [ ] Model dosyası / Türkçe üretken ONNX motoru.
 - [ ] Unit + e2e tarayıcı testleri.
 
