@@ -14,7 +14,7 @@ mkdirSync(out,{recursive:true});
 const copied=[],missing=[];
 function safe(id){return id.replace(/[^a-z0-9._-]/gi,'_');}
 for(const entry of report.packages){
- if(!entry.files.length){missing.push(entry.name+'@'+entry.version);continue;}
+ if(!entry.files.length){if(entry.scope!=='installed-only')missing.push(entry.name+'@'+entry.version);continue;}
  for(const filename of entry.files){
   const source=join(root,filename);
   const newName=safe(entry.name+'@'+entry.version)+'--'+safe(basename(filename));
