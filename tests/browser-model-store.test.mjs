@@ -53,5 +53,5 @@ test('açık indirme çağrısı olmadan ağ kullanılmaz; kota yetersizse ağ k
  assert.equal(fetched,0);
 });
 test('desteklenmeyen backend kurulumdan önce reddedilir',async()=>{
- await assert.rejects(installBrowserModel('cloud'),/INVALID_MODEL_BACKEND/);
+ await assert.rejects(installBrowserModel('cloud',{deps:{}}),/INVALID_MODEL_BACKEND/);
 });
