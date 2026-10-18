@@ -57,7 +57,7 @@ test('Boş Gmail iletisinde açık hata döner', () => {
 test('Outlook gövdesini yalnızca ana alandan okur', () => {
   const node = element('Görünen Outlook ileti içeriği');
   const main = { querySelectorAll: sel => sel === '[data-testid="message-body"]' ? [node] : [] };
-  const doc = { querySelector: sel => sel === '[role="main"]' ? main : null };
+  const doc = { querySelector: sel => sel === '[role="main"]' ? main : null, querySelectorAll: () => [] };
   const r = email.__okulensExtractEmail(doc, 'outlook.live.com');
   assert.equal(r.text, 'Görünen Outlook ileti içeriği');
 });
