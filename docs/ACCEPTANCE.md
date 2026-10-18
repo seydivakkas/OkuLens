@@ -11,16 +11,17 @@ Durum sözcükleri: `PASS` kanıtlı gerçek kabul; `PARTIAL` kapsam sınırlı;
 - [x] Readability.js 0.6.0 paket entegrasyonu (kod + sentetik kontrol).
 - [ ] Canlı makale sitelerinde gerçek Chrome/Edge doğrulaması (son kabul).
 - [ ] Model dosyası / Türkçe üretken ONNX motoru.
-- [ ] Unit + e2e tarayıcı testleri.
+- [x] Gmail/Outlook/YouTube ayırıcıları için sentetik birim testleri.
+- [ ] Unit + e2e tarayıcı testleri (gerçek tarayıcı).
 
 ## Gerçek cihaz (henüz HOLD)
 
 - [ ] Windows 11 Chrome stable panel açılışı.
 - [ ] Windows 11 Edge stable panel açılışı ve tekrar açma.
 - [ ] Makale seçimi ve yüzen balon yerleşimi.
-- [ ] Gmail SPA rota değişikliği / kapsama doğruluğu.
-- [ ] Outlook farklı DOM varyantları.
-- [ ] YouTube manual/ASR/transkriptsiz vaka.
+- [ ] Gmail SPA rota değişikliği / kapsama doğruluğu (sentetik kod var, gerçek cihaz HOLD).
+- [ ] Outlook farklı DOM varyantları (seçiciler sentetik doğrulandı, gerçek cihaz HOLD).
+- [ ] YouTube manual/ASR/transkriptsiz vaka (transkriptsiz hata sentetik doğrulandı, gerçek video HOLD).
 - [ ] 10/100/1000 kelime hedef sapması ölçümü.
 - [ ] Native AI İngilizce ve yerel fallback doğru etiketleniyor.
 - [ ] Sıfır üçüncü taraf AI ağ isteği kaydı.
