@@ -951,3 +951,16 @@ Kurulumdan sonra yan panelde **Yerel üretken ONNX** motoru seçilerek model iş
 Motor; kaynak metni yaklaşık 3.500 karakterlik pasajlara böler, uzun metni map–reduce ile ele alır, pasaj kimliklerini korur ve üretilen gerçek kelimeleri sayar. Kelime hedefleri *yaklaşıktır*. Geçici streaming çıktısı nihai sonuç değildir. Üretilen açıklamalar bağımsız iddia doğrulamasından geçmediği için model yanılgısı riski mevcuttur.
 
 **Detaylı mimari, kullanıcı onayı, model SHA/Lisans ve kabul sınırları:** [İşlem 004 — Yerel Üretken AI](docs/ISLEM_004_YEREL_URETKEN_AI.md). **Issue #4 açık/HOLD kalır**, gerçek model yüklenip ilk Türkçe inference ve bağımsız Windows Chrome/Edge kabulü alınmadıkça ürün özelliği PASS ilan edilemez.
+
+
+---
+
+## İşlem 004-A — Gerçek model kabul laboratuvarı
+
+Issue #4 bilinçli olarak **açık** kalır. Gerçek model dosyaları kurulduktan sonra Windows Chrome/Edge uzantısının Ayarlar ekranındaki **Gerçek Model Kabul Laboratuvarı** bağlantısı kullanılır. Doğrudan dosya: `studio/acceptance.html`.
+
+Beş kaynak odaklı test senaryosu vardır: 10 kelimelik mikro özet, 100 kelimelik standart özet, 1000 kelimelik çok parçalı derin rapor, Kolay Türkçe ve kaynak içi sahte komut. Gözlenen model çıktısı, ilk akış olayı, süre, JS heap tahmini ve kaynak dışı sayı uyarıları JSON olarak indirilir. Kapsamlı kaynak doğrulaması **yalnızca bağımsız insan değerlendirmesi ile** yapılabilir. `decision: HOLD` bir hata değil, gerçek cihaz kabulü tamamlanmadan PASS iddiasını engelleyen mühendislik politikasıdır.
+
+Adım adım Windows komutları, GPU ölçüm talimatları ve kabul matrisi: [İşlem 004-A — Gerçek Model Kabul Protokolü](docs/ISLEM_004A_GERCEK_MODEL_KABUL.md).
+
+**Uyarı:** Model manifesti görünmesi dosya SHA kanıtı veya başarılı inference anlamına gelmez. `npm run model:verify` işlemi, gerçek Türkçe üretim, iki tarayıcıda yürütme, VRAM ve kaynak sadakati birbirinden bağımsız doğrulanmalıdır.
