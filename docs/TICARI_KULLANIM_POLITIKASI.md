@@ -11,9 +11,9 @@
 - Windows 10/11 + Chrome/Edge Manifest V3 hedef platformları korunur.
 - Ücretli/bulut LLM API'si, zorunlu hesap, gizli telemetri, abonelik gerektiren servis, kullanıcı API anahtarı ve zorunlu üçüncü taraf sunucu **yasak**.
 - Yeni bileşen ticari kullanım, değişiklik ve **yeniden dağıtım** hakları kaynakla doğrulanmadan ürüne alınmaz.
-- Tercih edilen kod lisansları: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, 0BSD. CC0-1.0, Unlicense, Unicode-3.0 veya Zlib özel kullanım/kapsamına göre incelemeyle kabul edilebilir.
+- Tercih edilen kod lisansları: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, 0BSD ve OSI onaylı BlueOak-1.0.0. CC0-1.0, Unlicense, Unicode-3.0 veya Zlib kullanım/kapsamına göre incelemeyle kabul edilebilir.
 - GPL, AGPL, LGPL, SSPL, BSL/BUSL, Elastic License, Commons Clause, PolyForm, yalnızca araştırma/eğitim ve NonCommercial gibi ifadeler içeren bağımlılıklar **otomatik onaylanmaz**. Özellikle LGPL dinamik/statik bağlama yükümlülükleri hukuk incelemesi gerektirir. Kodda “free” yazması lisans değildir.
-- `scripts/ticari-lisans-denetimi.mjs` geliştirme aşamasında npm bağımlılıkları için fail-closed envanter üretir. Bu sınıflandırma tek başına ticari lisans onayı değildir.
+- `scripts/ticari-lisans-denetimi.mjs` npm ağacını ve esbuild'in gerçek `vendor/runtime-inputs.json` derleme girdilerini ayrı sınıflandırır. Geliştirmede HOLD bulguları raporlanıp CI sürdürülebilir; `--release` seçeneği sıkı engelleyici kapıdır. Bu sınıflandırma tek başına ticari lisans onayı değildir.
 - Fiyatlandırma özgürlüğü ile telif mülkiyeti ayrıdır: ürünün kendi MIT lisansı ticari satışa izin verir ama yayımlanmış sürümlerin MIT haklarını geri almaz. Proprietary/dual-licensing kararı hak sahipleri ve geçmiş katkılar incelenmeden sessizce uygulanamaz.
 
 ## 2. Mevcut bileşen envanteri
@@ -51,6 +51,8 @@ Aşağıdakiler tamamlanmadan ticari yayın yapılmaz:
 - Gmail/Outlook/YouTube erişimi için güncel hizmet şartları ve gerekiyorsa platform yazılı izin/kısıtlama incelemesi. Metne erişebilmek yeniden dağıtım veya ticari veri satışı hakkı vermez.
 - Avrupa kullanıcıları için gerekirse GDPR; Türkiye için KVKK ve veri sorumlusu/işleyen rolünün uzman incelemesi. Bu dosya mevzuat uygunluğu görüşü değildir.
 - Runtime `Network` denetimi ve model ilk indirme ile çevrimdışı üretim aşamalarının ayrı gösterilmesi.
+- Ürün adı/marka tescili ve tasarım/telif sahipliği araştırması; marka adının henüz kontrol edildiği veya tescilli olduğu iddia edilmez.
+- Ticari sürüm için `package-lock.json` dosyasının Git deposunda sürümlenmesi ve `npm ci` ile tekrarlanabilir paketlenmesi. Şu anda sürümlenmiş lockfile yoktur; sıkı yayın kontrolü bunu engeller.
 - Kullanıcının açık istemi olmadan e-posta/metin çekmeme; otomatik veri gönderme yok; yerel silme kontrollerinin çalışması.
 
 ## 5. Paketleme kapısı
@@ -94,3 +96,10 @@ Sonuçlar `build/ticari-uygunluk/` altındaki envanter ve uyarılarda saklanır.
 - https://huggingface.co/Qwen/Qwen3-0.6B
 - https://huggingface.co/minpeter/Qwen3-0.6B-Instruct
 - https://huggingface.co/onnx-community/Qwen3-0.6B-Instruct-ONNX
+
+
+### 18 Ekim 2026 — CI lisans ön taraması
+
+Gerçek browser bundle girdilerini ayıran CI çalışmasında **56 kurulu npm paketi**, **5 paket-ağacı inceleme kaydı** ve **54 üçüncü taraf bildirim dosyası** raporlandı. Tarayıcıya dağıtılan JS/WASM bileşenlerinde bilinen eksik lisans metni bu taramada **0**; rapor durumu `READY_FOR_LEGAL_REVIEW` **yalnızca derleme lisansı ön incelemesi** anlamına gelir. LGPL lisanslı `@img/sharp-libvips-linux-x64` kurulu ağaçta bulunur ancak mevcut esbuild tarayıcı girdilerine dahil görünmüyor. Bu durum, son paket ve dinamik yükleme incelemesi olmadan mutlak yokluk garantisi değildir.
+
+Ticari satış kararı halen `HOLD`: sürüm kontrolünde lockfile, gerçek model ve tarayıcı testi, platform şartları, gizlilik/marka/yayıncı bilgileri ve hukuk incelemesi tamamlanmadı.
