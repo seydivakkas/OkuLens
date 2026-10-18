@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OkuLens — Gerçek model kabul laboratuvarı</title>
+<style>
+:root{color-scheme:dark;font:15px/1.6 system-ui,sans-serif;background:#0b1425;color:#e5efff}
+*{box-sizing:border-box}body{max-width:1120px;margin:auto;padding:24px 20px 55px}header{display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px;align-items:center}
+a{color:#9bc4ff}h1{font-size:25px;line-height:1.2;margin:0}h2{font-size:19px}p{margin:8px 0 14px}
+section{border:1px solid #30425e;border-radius:14px;padding:20px;margin:18px 0;background:#101e32}
+small,.secondary{color:#aabedb}select,input,textarea,button{font:inherit}select,textarea,input{border-radius:8px;border:1px solid #547096;background:#0b192d;color:#f3f7fd;padding:9px;width:100%}
+button{padding:10px 15px;border-radius:9px;border:1px solid #547096;background:#223d63;color:#fff;cursor:pointer}button.primary{background:#2562ad;border-color:#609ce4}
+button:disabled{opacity:.48;cursor:not-allowed}button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #e2c25d}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.actions{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto;background:#0a1526;border-radius:10px;padding:14px}
+#output{min-height:90px;max-height:330px}label{display:block;font-weight:600;margin:8px 0 5px}
+.stat{padding:10px 14px;border:1px solid #30425e;border-radius:10px}
+.stat b{display:block;font-size:19px}
+hr{border:0;border-top:1px solid #31415c;margin:20px 0}
+</style></head><body>
+<header>
+<div><h1>OkuLens · Gerçek Model Kabul Laboratuvarı</h1><p class="secondary">İşlem 004 / A — Windows Chrome ve Edge için yerel doğrulama aracı</p></div>
+<a href="../options/index.html">Ayarlar</a>
+</header>
+<section><h2>Kabul sınırı</h2><p>Bu sayfa <strong>gerçek kurulu ONNX modeliyle</strong> çıktıyı dener. Büyük model dosyalarını otomatik indirmez, ücretli API kullanmaz ve sonucu herhangi bir sunucuya göndermez. Üretilen metin otomatik olarak doğru kabul edilmez.</p>
+<p id="model-status" role="status">Model durumu okunuyor…</p>
+<p class="secondary">JS heap ölçümü GPU VRAM ölçümü değildir. VRAM, RAM ve güç ölçümünü Windows araçlarından bağımsız olarak kaydedin. Çıktı ve rapor yalnızca siz indirmeyi seçerseniz dosyaya yazılır.</p></section>
+<section><h2>1. Kabul senaryosu</h2>
+<div class="grid"><div><label for="case">Test senaryosu</label><select id="case">
+<option value="micro">10 kelime · mikro özet</option>
+<option value="standard" selected>100 kelime · standart</option>
+<option value="deep">1000 kelime · derin rapor (uzun)</option>
+<option value="simple">100 kelime · kolay Türkçe</option>
+<option value="injected">100 kelime · kaynak içi sahte komut</option></select></div>
+<div><label for="backend">Yürütme tercihi</label><select id="backend"><option value="auto">Otomatik: WebGPU / kurulu WASM</option><option value="webgpu">WebGPU</option><option value="wasm">WASM</option></select></div></div>
+<label for="source">Kaynak metin (yerel sentetik fixture)</label><textarea id="source" rows="6" readonly></textarea>
+<p class="secondary">Kullanılan örnekler sentetiktir; gerçek e-posta veya kişisel veri içermemelidir. 1000 kelimelik vaka çok parçalı ve daha fazla işlem gerektirir.</p>
+<div class="actions"><button class="primary" id="run" type="button">Gerçek modeli çalıştır</button>
+<button id="cancel" type="button" disabled>İptal et</button><span id="run-status" role="status">Hazır.</span></div></section>
+<section><h2>2. Ölçüm ve üretilen çıktı</h2><div class="grid">
+<div class="stat">Durum<b id="state">HOLD</b></div>
+<div class="stat">Süre<b id="elapsed">—</b></div>
+<div class="stat">İlk akış olayı<b id="first">—</b></div>
+<div class="stat">Akış olay sayısı<b id="streams">—</b></div>
+<div class="stat">Kelime<b id="words">—</b></div>
+<div class="stat">JS heap zirvesi<b id="heap">Ölçülmedi</b></div></div>
+<h3>Üretken çıktı</h3><pre id="output" aria-live="polite">Henüz model çıktısı yok.</pre>
+<h3>Ön tarama (kesin doğruluk testi değildir)</h3><pre id="checks">İnsan incelemesi yapılmadı.</pre>
+</section>
+<section><h2>3. Bağımsız değerlendirme</h2>
+<p>Gerçek model çıktılarını yukarıdaki kaynakla karşılaştırarak doldurun. Bir yapay zekâ modeli kendi iddialarının doğruluğunu tek başına onaylayamaz.</p>
+<div class="grid">
+<div><label for="turkish">Türkçe anlaşılırlık</label><select id="turkish"><option value="unreviewed">İncelenmedi</option><option value="pass">Anlaşılır / yeterli</option><option value="fail">Yetersiz</option></select></div>
+<div><label for="factual">Kaynak dışı iddialar</label><select id="factual"><option value="unreviewed">İncelenmedi</option><option value="pass">Görünür kaynak dışı iddia yok</option><option value="fail">Kaynak dışı iddia bulundu</option></select></div>
+<div><label for="citations">Pasaj bazlı doğrulama</label><select id="citations"><option value="unreviewed">İncelenmedi</option><option value="pass">Tek tek incelendi</option><option value="fail">Doğrulanamayan iddia var</option></select></div>
+<div><label for="sha">CLI SHA-256 kontrolü</label><select id="sha"><option value="no">Yapılmadı / kanıt yok</option><option value="yes">npm run model:verify PASS</option></select></div>
+</div>
+<label for="note">İncelemeci notu / bellek ve VRAM kaydı</label><textarea id="note" rows="3" placeholder="Windows sürümü, Chrome/Edge sürümü, GPU ve VRAM izleme aracı; bulunan kaynak hataları…"></textarea>
+<div class="actions"><button id="download" type="button" disabled>JSON kanıt raporunu indir</button></div>
+<p class="secondary">Tek vaka raporu Issue #4’ün kapatılması için yeterli değildir. Chrome+Edge cihazları, farklı testler, model SHA ve kaynak değerlendirmesi ayrıca gereklidir.</p>
+</section>
+<script type="module" src="acceptance.js"></script></body></html>
