@@ -1,6 +1,7 @@
 import { summarizeExtractive, wordCount } from '../shared/summarize.mjs';
 import { tryNativeSummary } from '../shared/native-ai.mjs';
 import { analyzeText } from '../shared/hybrid-nlp.mjs';
+import { localModelStatus, runLocalModel } from '../shared/local-model-bridge.mjs';
 
 const $ = id => document.getElementById(id);
 const state = {
@@ -60,7 +61,18 @@ function showDocument(doc) {
 function showResult(result) {
   state.result = result;
   $('summary').textContent = result?.text || 'Henüz özet bulunmuyor.';
-  $('engine').textContent = result?.engine === 'builtin' ? 'Chrome yerleşik AI' : result?.engine === 'hybrid-extractive' ? 'TF-IDF + TextRank' : result?.engine === 'extractive' ? 'Yerel çıkarımsal' : 'Motor bekleniyor';
+  $('engine').textContent = result?.engine === 'local-onnx-generative' ? 'Yerel ONNX / ' + (result.backend || 'WebGPU/WASM') :
+    result?.engine === 'builtin' ? 'Chrome yerleşik AI' :
+    result?.engine === 'hybrid-extractive' ? 'TF-IDF + TextRank' :
+    result?.engine === 'extractive' ? 'Yerel çıkarımsal' : 'Motor bekleniyor';
+  const refs=result?.provenance||[];
+  $('sourceEvidence').hidden=!refs.length;
+  $('sourceRefs').replaceChildren();
+  for(const item of refs.slice(0,48)){
+    const p=document.createElement('p');
+    p.textContent=item.id+' · kaynak aralığı: '+item.startChar+'–'+item.endChar+' · yaklaşık '+item.words+' kelime';
+    $('sourceRefs').append(p);
+  }
   renderDiagnostics(result);
   $('meta').textContent = result ? `${result.actualWords} kelime • hedef ${result.targetWords} • ${new Date(result.createdAt).toLocaleString('tr-TR')}` : '';
   $('warn').textContent = (result?.warnings || []).join('\n');
@@ -164,16 +176,45 @@ async function summarize() {
     status('Yerel özet hazırlanıyor…');
     const warnings = [...(doc.warnings || [])];
     let result = null;
-    if (state.engineMode === 'auto' && state.difficulty === 'medium') {
+    // Üretken model yalnızca kullanıcı önce CLI ile paket kurduysa kullanılır.
+    if (state.engineMode !== 'extractive') {
+      const local = await localModelStatus();
+      if (local.ready) {
+        try {
+          result = await runLocalModel({
+            title: doc.sourceTitle, text: doc.text, targetWords: state.targetWords,
+            difficulty: state.difficulty, preference: 'auto'
+          }, {
+            signal: state.abort.signal,
+            onProgress(update) {
+              if (id !== state.jobId || state.abort?.signal.aborted) return;
+              if (update.type === 'loading') status('Yerel model yükleniyor (' + (update.backend || 'donanım kontrolü') + ')…');
+              else if (update.type === 'plan') status(update.parts + ' pasaj · ' + update.mode + ' · ' + update.backend);
+              else if (update.type === 'stream') {
+                status('Yerel üretim: ' + update.step + '/' + update.total + ' pasaj · ' + update.phase);
+                // Geçici akış taslağı; nihai özet veya doğrulanmış kanıt değildir.
+                $('summary').textContent = update.text || '';
+              }
+            }
+          });
+        } catch (e) {
+          if (state.abort?.signal.aborted) return;
+          warnings.push('LOCAL_MODEL_FAILED: ' + errorMessage(e) + '. Yerel TextRank fallback deneniyor.');
+        }
+      } else if (state.engineMode === 'local') {
+        warnings.push('LOCAL_MODEL_UNAVAILABLE: Model paketi kurulmamış veya manifest geçersiz. TextRank fallback kullanılacak.');
+      }
+    }
+    if (!result && state.engineMode === 'auto' && state.difficulty === 'medium') {
       try {
         result = await tryNativeSummary(doc.text, { targetWords: state.targetWords, language: doc.language, signal: state.abort.signal });
-      } catch (e) {
-        if (state.abort.signal.aborted) return;
-        warnings.push(`Yerleşik model kullanılamadı: ${errorMessage(e)}. Çıkarımsal metoda dönüldü.`);
+      } catch(e){
+        if (state.abort?.signal.aborted) return;
+        warnings.push('Yerleşik AI kullanılamadı: ' + errorMessage(e) + '. Yerel TextRank fallback.');
       }
     }
     if (id !== state.jobId || state.abort?.signal.aborted) return;
-    const diagnostics = analyzeText(doc.text, { targetWords: state.targetWords, title: doc.sourceTitle });
+    const diagnostics = analyzeText(doc.text,{targetWords:state.targetWords,title:doc.sourceTitle});
     if (!result) result = diagnostics;
     warnings.push(...diagnostics.warnings);
     const final = {
@@ -278,3 +319,8 @@ if (tab?.id) {
   await changeTab(tab.id);
   status('Kaynak hazır. Gizlilik için içeriği yalnızca Kaynağı al veya Özetle komutuyla çıkaracağız.');
 }
+localModelStatus().then(info=>{
+  $('modelStatus').textContent = info.ready
+    ? 'Yerel model paketi: '+info.modelId+' · '+(info.backends||[]).join('/')+' (gerçek tarayıcı testi HOLD)'
+    : 'Üretken ONNX modeli kurulu değil. Kurulum: README → İşlem 004. TextRank çalışır.';
+}).catch(()=>{$('modelStatus').textContent='Model durumu sorgulanamadı; TextRank kullanılabilir.';});
