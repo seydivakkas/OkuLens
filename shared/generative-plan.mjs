@@ -89,8 +89,18 @@ export async function runGenerativePlan(plan,{runner,signal,onProgress=()=>{}}={
   for(let i=0;i<chunks.length;i++)maps.push({id:chunks[i].id,sourceIds:[chunks[i].id],
    text:await generate('map',chunks[i].text,[chunks[i].id],Math.min(targetWords,120),i+1,chunks.length)});
   if(targetWords===1000){
-   text=maps.map(m=>'['+m.id+'] '+m.text).join('\n\n');
-   sections=maps.map(m=>({id:m.id,sourceIds:m.sourceIds,text:m.text}));
+   // Map metinleri ayrı bölüm olarak kalır; azaltılmış bölüm gruplarıyla ayrıca
+   // ikinci katman sentez yapılır. Kaynak iddiaları otomatik doğrulanmaz.
+   const syntheses=[];
+   for(let i=0;i<maps.length;i+=3){
+    const group=maps.slice(i,i+3),ids=group.flatMap(m=>m.sourceIds);
+    const combined=group.map(m=>'['+m.id+'] '+m.text).join('\n');
+    syntheses.push({id:'S'+String(Math.floor(i/3)+1),sourceIds:ids,
+      text:await generate('reduce',combined,ids,targetWords,Math.floor(i/3)+1,Math.ceil(maps.length/3))});
+   }
+   sections=[...maps.map(m=>({id:m.id,sourceIds:m.sourceIds,text:m.text})),...syntheses];
+   text=maps.map(m=>'['+m.id+'] '+m.text).join('\n\n')+
+     '\n\nBölüm sentezi:\n'+syntheses.map(m=>'['+m.id+'] '+m.text).join('\n\n');
   }else{
    let layer=maps,round=0;
    while(layer.length>1){
