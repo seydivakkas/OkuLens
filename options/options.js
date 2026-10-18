@@ -9,3 +9,17 @@ document.getElementById('save').addEventListener('click', async () => {
   });
   document.getElementById('status').textContent = 'Ayarlar cihazda kaydedildi.';
 });
+
+import {localModelStatus} from '../shared/local-model-bridge.mjs';
+async function refreshModel(){
+  const state=await localModelStatus();
+  document.getElementById('modelStatus').textContent=state.ready
+    ? 'Model dosyaları mevcut: '+state.modelId+' ('+(state.backends||[]).join('/')+'). Çalışma doğrulaması bekleniyor.'
+    : 'Model kurulmadı / manifest geçersiz. Üretken özet kapalı; yerel TextRank kullanılabilir.';
+}
+document.getElementById('copyInstall').addEventListener('click',async()=>{
+  await navigator.clipboard.writeText(document.getElementById('installCommand').textContent.trim());
+  document.getElementById('status').textContent='Kurulum komutları kopyalandı. İndirme siz komutu çalıştırmadan başlamaz.';
+});
+document.getElementById('checkModel').addEventListener('click',refreshModel);
+refreshModel().catch(()=>{document.getElementById('modelStatus').textContent='Model denetimi başarısız.';});
