@@ -173,6 +173,7 @@ async function summarize() {
     if (!state.doc?.text?.trim()) await capture();
     const doc = state.doc;
     if (!doc?.text) throw new Error('SOURCE_UNAVAILABLE');
+    showResult(null);
     status('Yerel özet hazırlanıyor…');
     const warnings = [...(doc.warnings || [])];
     let result = null;
@@ -216,7 +217,9 @@ async function summarize() {
     if (id !== state.jobId || state.abort?.signal.aborted) return;
     const diagnostics = analyzeText(doc.text,{targetWords:state.targetWords,title:doc.sourceTitle});
     if (!result) result = diagnostics;
-    warnings.push(...diagnostics.warnings);
+    // Üretken modelin uyarıları KORUNMALI; başarıyla üreten motora yanlışlıkla
+    // "çıkarımsal" uyarısı yazılmamalı.
+    warnings.push(...(result.warnings || []));
     const final = {
       ...result, targetWords: state.targetWords, actualWords: wordCount(result.text),
       difficulty: state.difficulty, createdAt: new Date().toISOString(), warnings, diagnostics
