@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {spawnSync} from 'node:child_process';
 const script=fileURLToPath(new URL('../scripts/ticari-lisans-denetimi.mjs',import.meta.url));
 const needed=['LICENSE','vendor/readability/LICENSE.md','vendor/readability/NOTICE',
- 'docs/THIRD_PARTY_MODELS.md','docs/TICARI_KULLANIM_POLITIKASI.md','docs/GIZLILIK_POLITIKASI_TASLAK.md'];
+ 'vendor/licenses/onnxruntime-MIT.txt','docs/THIRD_PARTY_MODELS.md','docs/TICARI_KULLANIM_POLITIKASI.md','docs/GIZLILIK_POLITIKASI_TASLAK.md'];
 function scenario({license='MIT',withNotice=true,withPackages=true}={}){
  const cwd=mkdtempSync(join(tmpdir(),'okulens-commercial-'));
  writeFileSync(join(cwd,'package.json'),JSON.stringify({name:'sample',license:'MIT',version:'1.0.0'}));
