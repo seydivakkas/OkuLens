@@ -7,7 +7,7 @@ const state = {
   tabId: null, doc: null, result: null, targetWords: 100, difficulty: 'medium',
   jobId: 0, abort: null, engineMode: 'auto'
 };
-const TYPE_NAMES = { selection: 'Seçili metin', article: 'Makale', email: 'E-posta (deneysel)', youtube: 'YouTube (deneysel)' };
+const TYPE_NAMES = { selection: 'Seçili metin', article: 'Makale', email: 'E-posta (görünür DOM)', youtube: 'YouTube (transkript paneli)' };
 const status = text => { $('status').textContent = text; };
 const setBusy = busy => {
   $('summarize').disabled = busy;
@@ -26,11 +26,14 @@ function showDocument(doc) {
     $('sourceTitle').textContent = 'Kaynak bekleniyor';
     $('sourceDetail').textContent = 'Özetlemek için desteklenen bir sekmede uzantıyı açın.';
     $('timeSection').hidden = true;
+    $('emailScopeField').hidden = true;
     return;
   }
   $('sourceTitle').textContent = doc.sourceTitle || '(Başlıksız kaynak)';
   $('sourceKind').textContent = (TYPE_NAMES[doc.sourceType] || doc.sourceType).toUpperCase();
-  $('sourceDetail').textContent = `${TYPE_NAMES[doc.sourceType] || doc.sourceType} • ${(doc.text || '').length.toLocaleString('tr-TR')} karakter`;
+  $('emailScopeField').hidden = doc.sourceType !== 'email';
+  const scopeInfo = doc.sourceType === 'email' ? ' • ' + (doc.scopeLabel || 'Görünür ileti') + ' (' + (doc.messageCount || 0) + ' ileti)' : '';
+  $('sourceDetail').textContent = `${TYPE_NAMES[doc.sourceType] || doc.sourceType} • ${(doc.text || '').length.toLocaleString('tr-TR')} karakter${scopeInfo}`;
   const stamps = doc.transcript || [];
   $('timeSection').hidden = stamps.length === 0;
   $('timestamps').replaceChildren();
@@ -44,8 +47,12 @@ function showDocument(doc) {
     text.textContent = segment.text.slice(0, 180);
     button.append(time, text);
     button.addEventListener('click', async () => {
-      try { await chrome.tabs.sendMessage(state.tabId, { type: 'OKULENS_SEEK_VIDEO', startMs: segment.startMs }); }
-      catch(e) { status(`Videoya atlanamadı: ${errorMessage(e)}`); }
+      try {
+        const response = await chrome.tabs.sendMessage(state.tabId, {
+          type: 'OKULENS_SEEK_VIDEO', startMs: segment.startMs, videoId: doc.videoId
+        });
+        if (!response?.ok) status(`Videoya atlanamadı: ${response?.error || 'VIDEO_UNAVAILABLE'}`);
+      } catch (e) { status(`Videoya atlanamadı: ${errorMessage(e)}`); }
     });
     $('timestamps').append(button);
   }
@@ -110,23 +117,30 @@ async function capture() {
   const tab = await currentTab();
   if (!tab?.id) throw new Error('NO_ACTIVE_TAB');
   if (tab.id !== state.tabId) await changeTab(tab.id);
-  // activeTab izni bu sekmede kullanıcı etkileşimiyle verilmiş olmalı.
+  // activeTab yalnızca uzantı simgesi / bağlam menüsü gibi uygun kullanıcı jestlerinden alınır.
   // Readability yalnızca makale sayfalarında ve kullanıcı kaynak istediğinde yüklenir.
   // E-posta / YouTube: ağır kütüphane yüklenmez ve mevcut çıkarıcılar korunur.
   const host = (() => { try { return new URL(tab.url).hostname.toLowerCase(); } catch { return ''; } })();
-  const specialized = host === 'mail.google.com' || host === 'outlook.live.com' || host === 'outlook.office.com' || host === 'outlook.office365.com' || host === 'youtube.com' || host.endsWith('.youtube.com');
-  if (!specialized) {
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ['vendor/readability/Readability.js', 'content/article-extractor.js']
-    });
+  const isEmail = host === 'mail.google.com' || ['outlook.live.com', 'outlook.office.com', 'outlook.office365.com'].includes(host);
+  const isYouTube = host === 'youtube.com' || host.endsWith('.youtube.com');
+  const files = isEmail
+    ? ['content/email-extractor.js', 'content/spa-monitor.js', 'content/injected.js']
+    : isYouTube
+      ? ['content/youtube-extractor.js', 'content/spa-monitor.js', 'content/injected.js']
+      : ['vendor/readability/Readability.js', 'content/article-extractor.js', 'content/injected.js'];
+  await chrome.scripting.executeScript({ target: { tabId: tab.id }, files });
+  const reply = await chrome.tabs.sendMessage(tab.id, {
+    type: 'OKULENS_EXTRACT', emailScope: $('emailScope').value
+  });
+  if (reply?.document?.sourceUrl && tab.url && reply.document.sourceUrl !== tab.url) {
+    showDocument(null);
+    throw new Error('SOURCE_CHANGED_DURING_CAPTURE: Kaynak sekme değişti, yeniden deneyin.');
   }
-  await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/injected.js'] });
-  const reply = await chrome.tabs.sendMessage(tab.id, { type: 'OKULENS_EXTRACT' });
   if (!reply?.ok || !reply.document?.text?.trim()) {
     showDocument(reply?.document || null);
     throw new Error(reply?.document?.warnings?.[0] || 'SOURCE_UNAVAILABLE: Okunabilir metin bulunamadı.');
   }
+  showResult(null);
   showDocument(reply.document);
   status(`Kaynak alındı: ${wordCount(reply.document.text)} kelime. Çıkarım yöntemi: ${reply.document.extractionMethod}`);
 }
@@ -197,6 +211,11 @@ for(const button of document.querySelectorAll('[data-level]'))button.addEventLis
   await chrome.storage.local.set({'okulens:difficulty':state.difficulty});
 });
 $('engineMode').addEventListener('change',e=>{state.engineMode=e.target.value;});
+$('emailScope').addEventListener('change', () => {
+  state.doc = null;
+  showResult(null);
+  status('E-posta kapsamı değişti. Kaynağı yeniden alarak kapsamı doğrulayın.');
+});
 $('inspect').addEventListener('click',()=>{$('inspection').hidden=!$('inspection').hidden});
 $('studio').addEventListener('click',()=>chrome.tabs.create({url:chrome.runtime.getURL('studio/index.html')}));
 $('capture').addEventListener('click', () => capture().catch(e => status(`Kaynak alınamadı: ${errorMessage(e)}`)));
@@ -214,12 +233,24 @@ $('clear').addEventListener('click', async () => {
   status('Özet geçici depodan temizlendi.');
 });
 chrome.tabs.onActivated.addListener(({ tabId }) => changeTab(tabId).catch(e => status(errorMessage(e))));
+function invalidateSource(tabId, reason) {
+  if (tabId !== state.tabId) return;
+  ++state.jobId;
+  state.abort?.abort();
+  state.doc = null;
+  showDocument(null);
+  showResult(null);
+  setBusy(false);
+  chrome.storage.session.remove(`summary:tab:${tabId}`).catch(console.warn);
+  status(reason);
+}
+chrome.runtime.onMessage.addListener((message, sender) => {
+  if (message?.type !== 'OKULENS_SOURCE_CHANGED' || sender.tab?.id !== state.tabId) return;
+  invalidateSource(sender.tab.id, 'Kaynak veya görünür ileti değişti. Yeni içerik için Kaynağı al seçin.');
+});
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
-  if (tabId === state.tabId && changeInfo.status === 'loading') {
-    state.doc = null;
-    showResult(null);
-    chrome.storage.session.remove(`summary:tab:${tabId}`).catch(console.warn);
-    status('Sayfa değişti. Yeni içeriği almak için Kaynağı al seçin.');
+  if (tabId === state.tabId && (changeInfo.status === 'loading' || typeof changeInfo.url === 'string')) {
+    invalidateSource(tabId, 'Sayfa veya SPA adresi değişti. Yeni içerik için Kaynağı al seçin.');
   }
 });
 const prefs = await chrome.storage.local.get(['okulens:targetWords', 'okulens:difficulty']);
@@ -232,5 +263,5 @@ for (const btn of document.querySelectorAll('[data-length]')) btn.classList.togg
 const tab = await currentTab();
 if (tab?.id) {
   await changeTab(tab.id);
-  capture().catch(e => status(`Kaynak alınamadı: ${errorMessage(e)}`));
+  status('Kaynak hazır. Gizlilik için içeriği yalnızca Kaynağı al veya Özetle komutuyla çıkaracağız.');
 }
