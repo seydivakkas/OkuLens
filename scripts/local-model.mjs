@@ -8,6 +8,7 @@ import {Readable,Transform} from 'node:stream';
 import {pipeline} from 'node:stream/promises';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
+import {METADATA_SHA256} from '../shared/browser-model-catalog.mjs';
 
 export const MODEL_ID='onnx-community/Qwen3-0.6B-Instruct-ONNX';
 export const REVISION='54250909aca286a05b9d013c8af7a21859ee6ead';
@@ -67,6 +68,7 @@ async function main(){
    const actual=await shaFile(path.join(base,...file.path.split('/')));
    if(actual!==file.sha256)throw new Error('SHA256_MISMATCH '+file.path);
    if(Object.values(WEIGHTS).some(w=>w.file===file.path&&w.sha256!==actual))throw new Error('WEIGHT_SHA256_MISMATCH');
+   if(METADATA_SHA256[file.path]&&METADATA_SHA256[file.path]!==actual)throw new Error('METADATA_SHA256_MISMATCH');
   }
   console.log('Model dosyaları doğrulandı:',record.files.length);return;
  }
@@ -77,7 +79,7 @@ async function main(){
   if(saved.modelId===MODEL_ID&&saved.revision===REVISION)existing=saved;
  }catch{}
  const files=[];
- for(const metadata of META)files.push(await download(metadata,null));
+ for(const metadata of META)files.push(await download(metadata,METADATA_SHA256[metadata]));
  for(const name of backends){const v=WEIGHTS[name];files.push(await download(v.file,v.sha256));}
  // Mevcut ikinci backend kurulumunu silme; kaydedilecek her dosyayı disk üzerinde doğrula.
  for(const previous of existing.files||[]){

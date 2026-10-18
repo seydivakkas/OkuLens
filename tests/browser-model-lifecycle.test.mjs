@@ -46,13 +46,13 @@ function fakeEnvironment(){
   }};
  return {deps,root,values,fetches};
 }
-test('ağırlık hash uyuşmazlığında tüm yeni OPFS dosyaları kaldırılır',async()=>{
+test('metadata hash uyuşmazlığında tüm yeni OPFS dosyaları kaldırılır',async()=>{
  const env=fakeEnvironment();
  await assert.rejects(installBrowserModel('webgpu',{deps:env.deps}),/MODEL_SHA256_MISMATCH/);
  assert.equal(env.values.has(STORE_KEY),false);
  const root=await env.root.getDirectoryHandle(STORE_PREFIX);
  assert.equal(root.dirs.size,0);
- assert.equal(env.fetches.length,10); // 9 metadata + 1 ağırlık
+ assert.equal(env.fetches.length,1); // İlk metadata hash hatasında durmalı
 });
 test('önyükleme/kurulum hatası eski kurulum kaydını silmez',async()=>{
  const env=fakeEnvironment();

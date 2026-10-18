@@ -1010,3 +1010,12 @@ Uzantının **Ayarlar → Tarayıcıda model yönetimi** bölümünde kullanıc�
 ## TİCARİ-003 — Gizlilik, KVKK ve tarayıcı izinleri (18 Ekim 2026)
 
 [TİCARİ-003 veri akış ve güvenlik sözleşmesi](docs/TICARI_003_GIZLILIK_KVKK_GUVENLIK.md) ile e-posta, makale, YouTube, kaynak URL'si, geçici özet, model indirme ve OPFS saklama davranışları ayrı veri sınıflarına ayrıldı. SPA bildirimlerinde kaynak URL'si gönderilmiyor; chrome.storage.local alanı güvenilir uzantı bağlamlarıyla sınırlanmak üzere başlatılıyor. Gizlilik sayfası tarayıcı OPFS indirmesiyle uyumlu güncellendi. Bunlar kod seviyesinde iyileştirmelerdir; gerçek Windows Chrome/Edge ağ, depolama ve KVKK/mağaza uzman kabulü HOLD'dur.
+
+
+---
+
+## İşlem 004-C — Bağımsız CDN ve OPFS kurtarma kanıtları
+
+[İşlem 004-C kanıt raporu](docs/ISLEM_004C_CDN_METADATA_OPFS_RECOVERY.md). Sabit Qwen3 model commitindeki **9 metadata dosyası** GitHub Actions ortamında gerçekten indirilerek SHA-256 doğrulamasına alındı. WebGPU (648449396 bayt) ve WASM (996522744 bayt) ağırlıklarının yalnızca **HTTP HEAD** yönlendirmeleri kontrol edildi; ikisinin de son hostu `us.aws.cdn.hf.co`. Bu gerçek Windows Chrome/Edge indirme/ONNX kabulü değildir.
+
+Ayarlar ekranında artık sahipsiz OPFS model klasörlerini önce **kuru taramayla** listeleyen, ancak kullanıcı tekrar onaylarsa silen kurtarma alanı bulunuyor. Aktif model dosyaları korunur. Model indirme kimlik bilgisi ve referrer içermeyecek biçimde güncellendi; dar ve gözlenmiş CDN host izni opsiyoneldir. Çevrimdışı üretim, kaynak sadakati, VRAM ve ticari yayın **HOLD**.

@@ -2,7 +2,7 @@
 body{font:15px system-ui,sans-serif;max-width:660px;margin:45px auto;padding:20px;color:#26364a;background:#f6f8fc}main{background:#fff;border:1px solid #dce4ed;border-radius:16px;padding:28px}h1{font-size:25px}label{display:block;margin:24px 0 8px;font-weight:700}select,button{font:inherit;border:1px solid #b9cadd;padding:10px 14px;border-radius:8px}button{background:#194579;color:white;cursor:pointer;margin-top:22px}small{color:#65758d;line-height:1.5}#status{margin-top:20px}
 </style></head><body><main><h1>OkuLens · Ayarlar</h1><p><a href="gizlilik.html">Gizlilik, açık kaynak lisansları ve ticari kullanım bilgileri</a></p><p>Bu tercihler yalnızca bu tarayıcı profilinde saklanır. Üretken model isteğe bağlıdır. Model verileri büyük olduğundan siz onay vermeden indirilmez.</p><label for="length">Varsayılan kelime hedefi</label><select id="length"><option value="10">10 kelime</option><option value="100">100 kelime</option><option value="1000">1000 kelime</option></select><label for="difficulty">Varsayılan anlatım seviyesi</label><select id="difficulty"><option value="easy">Kolay</option><option value="medium">Orta</option><option value="hard">Zor / akademik</option></select><p><small>Not: TF-IDF/TextRank anlatım düzeyini yeniden yazmaz. Yerel ONNX modeli kurulursa gerçek üretken motor bu seviyeleri deneyecektir; kalite doğrulaması HOLD.</small></p><p><a href="../studio/acceptance.html">Gerçek model kabul laboratuvarını aç (Türkçe çıktı / bellek / streaming / kaynak kontrolü)</a></p><section aria-labelledby="browserModelHeading">
 <h2 id="browserModelHeading">Tarayıcıda model yönetimi (TİCARİ-002 adayı)</h2>
-<p><small>Model kurulumu yalnızca siz istediğinizde başlar. WebGPU yaklaşık 648 MB, WASM yaklaşık 997 MB ONNX ağırlığı ve ek tokenizer verileri gerektirir. Uzak indirme için Hugging Face izni ayrıca sorulur; indirme başka CDN alanına yönlendirilirse tarayıcı engelleyebilir. Bu mimari henüz gerçek Chrome/Edge üzerinde kabul edilmedi.</small></p>
+<p><small>Model kurulumu yalnızca siz istediğinizde başlar. WebGPU yaklaşık 648 MB, WASM yaklaşık 997 MB ONNX ağırlığı ve ek tokenizer verileri gerektirir. Uzak indirme izni yalnızca huggingface.co ve ölçülmüş us.aws.cdn.hf.co alan adları için ayrıca sorulur. Başka CDN alanına yönlendirme olursa kurulum güvenli hata verebilir. Bu mimari henüz gerçek Chrome/Edge üzerinde kabul edilmedi.</small></p>
 <label for="browserBackend">İndirilecek model türü</label>
 <select id="browserBackend"><option value="webgpu">WebGPU q4f16 (648 MB)</option><option value="wasm">WASM q4 (997 MB)</option></select>
 <p id="browserModelStatus" role="status">Tarayıcı model dosyaları kontrol ediliyor…</p>
@@ -15,6 +15,9 @@ body{font:15px system-ui,sans-serif;max-width:660px;margin:45px auto;padding:20p
 <button type="button" id="browserAbort" disabled>İndirmeyi iptal et</button>
 <button type="button" id="browserVerify">SHA-256 bütünlüğünü denetle</button>
 <button type="button" id="browserRemove">Kurulu modeli sil</button>
+<button type="button" id="browserOrphans">Çökme sonrası artık dosyaları tara</button>
+<button type="button" id="browserCleanOrphans" disabled>Onaylayarak artık dosyaları temizle</button>
+<p id="browserOrphanStatus" role="status">Artık kurulum klasörleri henüz taranmadı.</p>
 </section>
 <section><h2>Geliştirici/yerel klasör modeli (eski yöntem)</h2>
 <p id="modelStatus">Model durumu okunuyor…</p>

@@ -1,0 +1,19 @@
+name: OkuLens upstream model metadata SHA denetimi
+on:
+  push:
+    branches:
+      - feature/islem-004c-cdn-metadata-opfs-recovery
+  workflow_dispatch:
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Sabitlenmiş model metadata dosyalarının SHA-256 değerlerini hesapla
+        run: node scripts/audit-model-metadata.mjs
+      - name: Büyük ONNX ağırlıklarını indirmeden CDN yönlendirmelerini kontrol et
+        run: node scripts/probe-model-cdn.mjs

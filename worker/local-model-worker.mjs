@@ -71,6 +71,12 @@ async function prepare(urls,preference,jobId,browserRecord){
     if(!response)throw new Error('BROWSER_OPFS_FILE_MISSING');
     return response;
    }
+   // Üretim sırasında Worker'ın HTTP(S) isteğine çıkması kesin engel:
+   // OPFS modeli ve paketli WASM uzantı origin'inden yüklenmelidir.
+   const resolved=new URL(String(url||''),self.location.href);
+   if(resolved.protocol==='https:'||resolved.protocol==='http:'){
+    throw new Error('RUNTIME_REMOTE_FETCH_FORBIDDEN');
+   }
    return originalFetch(input,options);
   };
  }else{
