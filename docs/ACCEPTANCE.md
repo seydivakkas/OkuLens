@@ -10,7 +10,10 @@ Durum sözcükleri: `PASS` kanıtlı gerçek kabul; `PARTIAL` kapsam sınırlı;
 - [x] Uzaktan LLM API istemcisi kaynak kodunda yok.
 - [x] Readability.js 0.6.0 paket entegrasyonu (kod + sentetik kontrol).
 - [ ] Canlı makale sitelerinde gerçek Chrome/Edge doğrulaması (son kabul).
-- [ ] Model dosyası / Türkçe üretken ONNX motoru.
+- [x] Koşullu Qwen3-0.6B ONNX model Worker/planlayıcı ve SHA installer kodu, sentetik birim denetimleri.
+- [ ] Model dosyası/Transfomers.js runtime yerel paketinin kurularak gerçek Türkçe model inference PASS edilmesi (HOLD).
+- [ ] WebGPU q4f16 ve WASM q4 backend gerçek Windows tarayıcı kontrolleri (HOLD).
+- [ ] Model 10/100/1000 çıktı hedef sapmaları, pasaja sadakat, uydurma iddia, streaming/iptal gerçek cihaz ölçümü (HOLD).
 - [x] Gmail/Outlook/YouTube ayırıcıları için sentetik birim testleri.
 - [ ] Unit + e2e tarayıcı testleri (gerçek tarayıcı).
 
@@ -24,8 +27,8 @@ Durum sözcükleri: `PASS` kanıtlı gerçek kabul; `PARTIAL` kapsam sınırlı;
 - [ ] YouTube manual/ASR/transkriptsiz vaka (transkriptsiz hata sentetik doğrulandı, gerçek video HOLD).
 - [ ] 10/100/1000 kelime hedef sapması ölçümü.
 - [ ] Native AI İngilizce ve yerel fallback doğru etiketleniyor.
-- [ ] Sıfır üçüncü taraf AI ağ isteği kaydı.
+- [ ] Model kurulduktan sonra sıfır üçüncü taraf AI ağ isteği kaydı (runtime denetlenmedi).
 - [ ] Engelli site, worker sonlandırma, tab kapama, panel yeniden açma.
 - [ ] Erişilebilirlik ve Windows kullanıcı kabulü.
 
-**Genel durum:** `HOLD` — gerçek tarayıcı kabulü yapılmadı. Yerel Node kontrolü ürün kabulü olarak yorumlanmaz.
+**Genel durum:** `HOLD` — model gerçek inference ve Windows Chrome/Edge kabulü yapılmadı. Node sentetik testleri ürün/kalite kabulü olarak yorumlanmaz.
