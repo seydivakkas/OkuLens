@@ -48,7 +48,7 @@ test('OPFS listesinde olmayan model ağırlığı fail closed',async()=>{
   cache.guardedFetch(cache.modelPrefix+'onnx/model_fp16.onnx',{},()=>({})),
   /LOCAL_MODEL_ASSET_NOT_LISTED/);
 });
-test('paket içi farklı extension dosyasını yerel delegate'e bırakır',async()=>{
+test('paket içi farklı extension dosyasını yerel yükleyiciye bırakır',async()=>{
  const {cache}=makeCache();let seen='';
  const value=await cache.guardedFetch('chrome-extension://testabc123/vendor/ort/ort.wasm',{},
   url=>{seen=url;return new Response('wasm',{status:200});});
