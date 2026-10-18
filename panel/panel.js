@@ -111,6 +111,16 @@ async function capture() {
   if (!tab?.id) throw new Error('NO_ACTIVE_TAB');
   if (tab.id !== state.tabId) await changeTab(tab.id);
   // activeTab izni bu sekmede kullanıcı etkileşimiyle verilmiş olmalı.
+  // Readability yalnızca makale sayfalarında ve kullanıcı kaynak istediğinde yüklenir.
+  // E-posta / YouTube: ağır kütüphane yüklenmez ve mevcut çıkarıcılar korunur.
+  const host = (() => { try { return new URL(tab.url).hostname.toLowerCase(); } catch { return ''; } })();
+  const specialized = host === 'mail.google.com' || host === 'outlook.live.com' || host === 'outlook.office.com' || host === 'outlook.office365.com' || host === 'youtube.com' || host.endsWith('.youtube.com');
+  if (!specialized) {
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ['vendor/readability/Readability.js', 'content/article-extractor.js']
+    });
+  }
   await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/injected.js'] });
   const reply = await chrome.tabs.sendMessage(tab.id, { type: 'OKULENS_EXTRACT' });
   if (!reply?.ok || !reply.document?.text?.trim()) {
