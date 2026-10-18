@@ -33,7 +33,7 @@ test('MIT paketini ve lisans bildirimini envantere alır',()=>{
 test('Copyleft veya lisansı bilinmeyen bağımlılık otomatik onaylanmaz',()=>{
  for(const license of ['GPL-3.0-only','SEE LICENSE IN custom-file','Business Source License']){
   const x=scenario({license});
-  try{const r=x.run();assert.notEqual(r.status,0,'Engellenmeyen lisans: '+license);
+  try{const r=x.run(true);assert.notEqual(r.status,0,'Engellenmeyen lisans: '+license);
    assert.match(r.stdout,/LICENSE_REVIEW/);
   }finally{x.cleanup();}
  }
@@ -47,5 +47,5 @@ test('Eksik lisans bildirimi geliştirici denetiminde PARTIAL, release sırasın
 });
 test('Bağımlılık dizini yoksa incelenmiş gibi davranmaz',()=>{
  const x=scenario({withPackages:false});
- try{const r=x.run();assert.notEqual(r.status,0);assert.match(r.stdout,/DEPENDENCY_TREE_MISSING/);}finally{x.cleanup();}
+ try{const r=x.run(true);assert.notEqual(r.status,0);assert.match(r.stdout,/DEPENDENCY_TREE_MISSING/);}finally{x.cleanup();}
 });
