@@ -8,7 +8,7 @@
 ## Teknik değişiklikler
 
 - **shared/local-model-response-cache.mjs:** Model dosyası adreslerini aynı uzantı kimliği, model ID'si ve aktif OPFS manifestinde kayıtlı dosya yollarıyla eşler. İzinli OPFS Response döner. HTTPS/HTTP uzak model istekleri engellenir. Yanlış uzantı kimliği veya bilinmeyen model dosyası kabul edilmez. Cache read-only tutulur.
-- **worker/local-model-worker.mjs:** Tek OPFS yanıt adaptörünü Transformers.js ortamına bağlar. Model üretimi başlatmayan yeni PREFLIGHT mesajında Worker, mevcut tüm kurulu dosyaların OPFS Response ve beklenen bayt boyutlarını inceler.
+- **worker/local-model-worker.mjs:** Tek OPFS yanıt adaptörünü Transformers.js ortamına bağlar. Model üretimi başlatmayan yeni PREFLIGHT mesajında Worker, mevcut tüm kurulu dosyaların OPFS Response ve beklenen bayt boyutlarını inceler; her Response akışından yalnız ilk veri parçasını okuyup kapatır. Büyük ONNX dosyası tamamıyla RAM'e alınmaz.
 - **shared/local-model-bridge.mjs:** preflightLocalModel çağrısı kullanıcı isteğiyle Worker başlatır, sonlandırma/iptal ve hata kodlarını açıkça iletir.
 - **studio/acceptance.html / acceptance.js:** Kabul laboratuvarına OPFS Worker ön testi ve kullanıcı komutuyla JSON kanıt indirme eklendi.
 - **tests/local-model-response-cache.test.mjs:** Kaynak URL eşleşmesi, uzak ağ reddi, cache, Worker ön test ve iptal kontrol senaryoları.
