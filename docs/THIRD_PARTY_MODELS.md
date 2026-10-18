@@ -16,3 +16,14 @@ P4'te kullanılan ONNX dosyası kaynağı sabit revizyondan alınır:
 Bu değerler kaynak model yükleme kayıtlarında yayınlanan dosya hashleridir; **model dosyalarının bu oturumda indirilip doğrulandığı iddiası değildir**. Kurulum betiği dosyayı indirdiğinde gerçek SHA'yı karşılaştırır ve yerel manifest üretir. Büyük dosya ve derlenmiş runtime GitHub'da yoktur.
 
 Ürünün kendi kodu MIT lisanslıdır; üçüncü taraf model/kütüphaneler kendi lisanslarına tabidir. Yeniden dağıtım öncesi tüm lisans metinleri ve model kartı doğrulanmalıdır.
+
+
+## Ticari dağıtım ek değerlendirmesi — 18 Ekim 2026
+
+- Qwen ONNX modelinin soy ağacı: [Qwen/Qwen3-0.6B](https://huggingface.co/Qwen/Qwen3-0.6B) → [minpeter/Qwen3-0.6B-Instruct](https://huggingface.co/minpeter/Qwen3-0.6B-Instruct) → [onnx-community/Qwen3-0.6B-Instruct-ONNX](https://huggingface.co/onnx-community/Qwen3-0.6B-Instruct-ONNX). Üç model kartının görünen lisansı Apache-2.0; bu, gelecekte paketlenen tüm varlıkların yeniden dağıtım dosyalarının tamamlandığı anlamına gelmez.
+- Mozilla Readability Apache-2.0 ve ONNX Runtime Web MIT bildirimleri uzantı paketinde korunmalıdır.
+- Transformers.js npm ağacı kurulduğunda bazı **geliştirme ortamı** bağımlılıkları da gelir. İlk CI: 56 paket, `@img/sharp-libvips-linux-x64` için LGPL-3.0-or-later inceleme HOLD, bazı lisans metinleri eksik. Bunların tarayıcıya paketlenip paketlenmediğini kesinleştirmeden otomatik uyum ilan edilmez.
+- BlueOak-1.0.0 OSI onaylı ve ticari kullanıma izin veren bir lisanstır; özgün lisans veya URL bildirimi gerekir. https://opensource.org/license/BlueOak-1.0.0
+- Tekil dependency sürümlerinin tam listesi `npm run commercial:check` komutunun oluşturduğu `build/ticari-uygunluk/lisans-envanteri.json` çıktısındadır. Bu çıktıda bulgu varsa ücretli sürüm yayımlanmamalı.
+
+[Ticari kullanım ve yayımlama kapısı](TICARI_KULLANIM_POLITIKASI.md).
