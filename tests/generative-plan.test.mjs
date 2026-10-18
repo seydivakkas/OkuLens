@@ -33,7 +33,7 @@ test('üretken çok parçalı özet map-reduce ve kaynak izlerini korur',async()
  const result=await runGenerativePlan(p,{runner:{async generate(prompt,{maxNewTokens,onToken}){
   calls++;
   assert.ok(maxNewTokens>0);
-  const stage=prompt.includes('önceki pasaj özetlerini')?'reduce':'map';
+  const stage=prompt.toLocaleLowerCase('tr-TR').includes('önceki pasaj özetlerini')?'reduce':'map';
   phases.push(stage);
   onToken('Örnek ');onToken('özet.');
   return 'Örnek özet.';
