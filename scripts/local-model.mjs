@@ -80,6 +80,6 @@ async function main(){
  await import('node:fs/promises').then(fs=>fs.writeFile(manifestPath,JSON.stringify(manifest,null,2)+'\n'));
  console.log('Kurulum tamamlandı. Kayıt:',manifestPath);
 }
-if(process.argv[1]&&import.meta.url===new URL('file://'+path.resolve(process.argv[1]).replace(/\\/g,'/')).href){
+if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){
  main().catch(e=>{console.error('MODEL_INSTALL_FAILED:',e.message);process.exitCode=1;});
 }
