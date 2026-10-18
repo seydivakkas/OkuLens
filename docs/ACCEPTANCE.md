@@ -20,6 +20,18 @@ Durum sözcükleri: `PASS` kanıtlı gerçek kabul; `PARTIAL` kapsam sınırlı;
 - [x] Gmail/Outlook/YouTube ayırıcıları için sentetik birim testleri.
 - [ ] Unit + e2e tarayıcı testleri (gerçek tarayıcı).
 
+## İşlem 004-C — CDN, Metadata, OPFS kurtarma
+
+- [x] Dokuz upstream metadata dosyası sabit revizyondan Linux GitHub Actions ile indirilip SHA-256 pinlendi.
+- [x] WebGPU/WASM ağırlıklarının yalnızca HTTP HEAD yönlendirme hostu ve content-length bilgileri Linux CI üzerinde doğrulandı: us.aws.cdn.hf.co.
+- [x] Dar opsiyonel CDN izni ve metadata SHA kurulum fail-closed sözleşmesi kodlandı.
+- [x] OPFS sahipsiz klasörleri kuru tara / açık onayla sil; aktif kurulum korunur (sentetik).
+- [ ] Chrome/Edge gerçek CDN CORS/izin/ONNX tam dosya indirme kabulü (**HOLD**).
+- [ ] Windows OPFS çökme sonrası temizlik, yeniden açma, tam model WebGPU/WASM yükleme (**HOLD**).
+- [ ] Gerçek ağ kapalıyken Türkçe ONNX 10/100/1000, streaming/VRAM ve bağımsız kaynak sadakati (**HOLD**).
+
+[İşlem 004-C kanıt belgesi](ISLEM_004C_CDN_METADATA_OPFS_RECOVERY.md)
+
 ## TİCARİ-003 — Gizlilik, KVKK ve modelin gerçek ağ kabulü
 
 - [x] TİCARİ-003 veri sınıflandırması, izin matrisi, model indirme, session/OPFS ve tehdit modeli belgelendi.
