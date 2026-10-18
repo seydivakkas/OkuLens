@@ -71,12 +71,27 @@ async function main(){
   console.log('Model dosyaları doğrulandı:',record.files.length);return;
  }
  // Sadece kullanıcının istediği backend indirilir; üretken model olmazsa TextRank kalır.
+ let existing={files:[],backends:[]};
+ try{
+  const saved=JSON.parse(await readFile(manifestPath,'utf8'));
+  if(saved.modelId===MODEL_ID&&saved.revision===REVISION)existing=saved;
+ }catch{}
  const files=[];
  for(const metadata of META)files.push(await download(metadata,null));
  for(const name of backends){const v=WEIGHTS[name];files.push(await download(v.file,v.sha256));}
+ // Mevcut ikinci backend kurulumunu silme; kaydedilecek her dosyayı disk üzerinde doğrula.
+ for(const previous of existing.files||[]){
+  if(files.some(f=>f.path===previous.path))continue;
+  try{
+   const disk=await shaFile(path.join(base,...previous.path.split('/')));
+   if(disk===previous.sha256)files.push(previous);
+  }catch{}
+ }
+ const finalBackends=[...new Set([...backends,...(existing.backends||[])])]
+  .filter(name=>files.some(f=>f.path===WEIGHTS[name]?.file&&f.sha256===WEIGHTS[name]?.sha256));
  await mkdir(root,{recursive:true});
  const manifest={schemaVersion:1,modelId:MODEL_ID,revision:REVISION,license:'Apache-2.0',
-  installation:'user-consented-local',backends,installedAt:new Date().toISOString(),files};
+  installation:'user-consented-local',backends:finalBackends,installedAt:new Date().toISOString(),files};
  await import('node:fs/promises').then(fs=>fs.writeFile(manifestPath,JSON.stringify(manifest,null,2)+'\n'));
  console.log('Kurulum tamamlandı. Kayıt:',manifestPath);
 }
