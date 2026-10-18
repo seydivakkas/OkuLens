@@ -20,3 +20,6 @@ models/
 /vendor/transformers.runtime.mjs
 /vendor/runtime-build.json
 *.part
+
+# Ticari envanter ve paketleme çıktıları
+/vendor/ticari-lisanslar/
