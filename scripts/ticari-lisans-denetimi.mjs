@@ -11,7 +11,11 @@ const strict=process.argv.includes('--release');
 const canonical=new Set(['MIT','Apache-2.0','BSD-2-Clause','BSD-3-Clause','ISC','0BSD','CC0-1.0','Unlicense','Unicode-3.0','Zlib','BlueOak-1.0.0']);
 const prohibited=/\b(?:AGPL|GPL|LGPL|SSPL|BUSL|BSL|Commons Clause|non[- ]commercial|NC[-\s]|PolyForm|Elastic License)\b/i;
 const licenseFiles=/^(LICENSE|LICENCE|COPYING|NOTICE)(?:[-_.].*)?$/i;
+const bundlePath=join(root,'vendor','runtime-inputs.json');
+let bundleInputs=null;
+try{bundleInputs=json(bundlePath).inputs.map(s=>s.replaceAll('\\','/'));}catch{}
 const report={schemaVersion:1,mode:strict?'release':'development',generatedAt:new Date().toISOString(),
+ browserBundleInventoryPresent:Array.isArray(bundleInputs),
  findings:[],packages:[],status:'HOLD',count:0};
 function finding(code,path,detail){report.findings.push({code,path,detail});}
 function json(path){return JSON.parse(readFileSync(path,'utf8'));}
@@ -51,11 +55,20 @@ function inspect(dir,seen){
  const license=typeof pkg.license==='string'?pkg.license:pkg.license?.type??null;
  const files=readdirSync(dir).filter(x=>licenseFiles.test(x));
  const state=legalStatus(license);
- const entry={name:pkg.name,version:pkg.version??null,license,classification:state,
+ const normalized=key.replaceAll('\\','/')+'/';
+ const bundled=Boolean(bundleInputs?.some(name=>name.startsWith(normalized)));
+ // ONNX Runtime WASM dosyaları bundle dışında ayrıca kopyalanır.
+ const wasm=pkg.name==='onnxruntime-web';
+ const scope=bundled?'bundled-js':wasm?'bundled-wasm':'installed-only';
+ const entry={name:pkg.name,version:pkg.version??null,license,classification:state,scope,
   files:files.map(x=>relative(root,join(dir,x)))};
  report.packages.push(entry);
- if(state!=='PERMISSIVE')finding(state==='UNKNOWN'?'LICENSE_UNKNOWN':'LICENSE_REVIEW',key,'SPDX: '+String(license));
- if(!files.length)finding('LICENSE_NOTICE_MISSING',key,'Dağıtım paketi için lisans/bildirim metni bulunamadı');
+ if(state!=='PERMISSIVE'){
+  const code=state==='UNKNOWN'?'LICENSE_UNKNOWN':'LICENSE_REVIEW';
+  finding(bundleInputs&&!bundled&&!wasm?code+'_INSTALLED_ONLY':code,key,'SPDX: '+String(license)+'; kapsam: '+scope);
+ }
+ if(!files.length)finding(bundleInputs&&!bundled&&!wasm?'LICENSE_NOTICE_MISSING_INSTALLED_ONLY':'LICENSE_NOTICE_MISSING',key,
+  'Lisans/bildirim metni eksik; kapsam: '+scope);
  scan(join(dir,'node_modules'),seen);
 }
 const own=json(join(root,'package.json'));
@@ -65,10 +78,12 @@ for(const required of ['LICENSE','vendor/readability/LICENSE.md','vendor/readabi
  if(!existsSync(join(root,required)))finding('REQUIRED_NOTICE_MISSING',required,'Ticari uygunluk dosyası eksik');
 }
 if(!existsSync(join(root,'node_modules')))finding('DEPENDENCY_TREE_MISSING','node_modules','Önce npm install çalıştırın; bağımlılıklar taranmadı');
+if(!bundleInputs)finding('RUNTIME_BUNDLE_INVENTORY_MISSING','vendor/runtime-inputs.json',
+  'Üretime giden npm paketleri sınıflandırılamadı; önce npm run build:runtime.');
 else scan(join(root,'node_modules'));
 report.packages.sort((a,b)=>a.name.localeCompare(b.name)||String(a.version).localeCompare(String(b.version)));
 report.count=report.packages.length;
-const blocking=new Set(['LICENSE_UNKNOWN','LICENSE_REVIEW','REQUIRED_NOTICE_MISSING','OWN_LICENSE_CHANGED','INVALID_PACKAGE_JSON','DEPENDENCY_TREE_MISSING']);
+const blocking=new Set(['LICENSE_UNKNOWN','LICENSE_REVIEW','REQUIRED_NOTICE_MISSING','OWN_LICENSE_CHANGED','INVALID_PACKAGE_JSON','DEPENDENCY_TREE_MISSING','RUNTIME_BUNDLE_INVENTORY_MISSING']);
 report.status=report.findings.some(f=>blocking.has(f.code))?'HOLD':(report.findings.some(f=>f.code==='LICENSE_NOTICE_MISSING')?'PARTIAL':'READY_FOR_LEGAL_REVIEW');
 const outputDir=join(root,'build','ticari-uygunluk');
 mkdirSync(outputDir,{recursive:true});
