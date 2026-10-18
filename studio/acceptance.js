@@ -8,6 +8,7 @@ let active=null;
 let record=null;
 let modelInfo={ready:false};
 let browserReady=false;
+let lastPreflight=null;
 const formatMs=n=>Number.isFinite(n)?Math.round(n)+' ms':'Ölçülmedi';
 const formatMB=n=>Number.isFinite(n)?(n/1048576).toFixed(1)+' MB':'Ölçülmedi';
 function heap(){
@@ -138,10 +139,17 @@ async function beginPreflight(){
  const controller=new AbortController();
  active={controller};
  setBusy(true);
+ lastPreflight=null;
+ $('preflight-download').disabled=true;
  $('preflight-result').textContent='OPFS dosyaları gerçek uzantı Worker’ında okunuyor. Model çıkarımı başlatılmıyor…';
  $('run-status').textContent='OPFS Worker ön kontrolü çalışıyor.';
  try{
   const result=await preflightLocalModel({signal:controller.signal});
+  lastPreflight={schemaVersion:1,kind:'OKULENS_OPFS_WORKER_PREFLIGHT',
+   observedAt:new Date().toISOString(),browserUserAgent:navigator.userAgent,
+   result,networkCaptureStatus:'NOT_MEASURED',realModelInferenceVerified:false,
+   decision:'HOLD'};
+  $('preflight-download').disabled=false;
   $('preflight-result').textContent=JSON.stringify(result,null,2);
   $('run-status').textContent='OPFS Worker dosya ön kontrolü tamamlandı. Gerçek ONNX üretimi / çevrimdışı çalışma hâlâ HOLD.';
  }catch(error){
@@ -177,6 +185,16 @@ function download(){
 }
 $('case').addEventListener('change',resetCase);
 $('preflight').addEventListener('click',()=>beginPreflight());
+$('preflight-download').addEventListener('click',()=>{
+ if(!lastPreflight)return;
+ const bytes=new Blob([JSON.stringify(lastPreflight,null,2)+'\n'],{type:'application/json'});
+ const url=URL.createObjectURL(bytes),a=document.createElement('a');
+ a.href=url;
+ a.download='okulens-islem004d-opfs-onkontrol-'+new Date().toISOString().slice(0,10)+'.json';
+ a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+
 $('run').addEventListener('click',()=>begin().catch(e=>{$('run-status').textContent='LAB_ERROR: '+(e.message||e);}));
 $('cancel').addEventListener('click',()=>active?.controller.abort());
 $('download').addEventListener('click',download);
