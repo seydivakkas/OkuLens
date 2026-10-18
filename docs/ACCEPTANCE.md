@@ -20,6 +20,16 @@ Durum sözcükleri: `PASS` kanıtlı gerçek kabul; `PARTIAL` kapsam sınırlı;
 - [x] Gmail/Outlook/YouTube ayırıcıları için sentetik birim testleri.
 - [ ] Unit + e2e tarayıcı testleri (gerçek tarayıcı).
 
+## TİCARİ-002 — Tarayıcı modeli depolama
+
+- [x] OPFS yönetimi, indirme onayı ve sabit model kataloğu kodlandı.
+- [x] Artımlı SHA-256, kota ve indirme reddi için sentetik Node testleri eklendi.
+- [x] Ayarlar ekranından model silme / yeniden SHA kontrolü / iptal işlemleri bağlandı (kod).
+- [ ] Hugging Face büyük modelin gerçek Chrome/Edge CDN/CORS/opsiyonel izin indirme kabulü (HOLD).
+- [ ] OPFS dosyalarının gerçek tarayıcıda saklanması, silinmesi, evict ve yeniden açılma kabulü (HOLD).
+- [ ] OPFS -> Transformers.js / ONNX Runtime adaptörünün gerçek Türkçe inference kabulü (HOLD).
+- [ ] Upstream metadata SHA pinleme ve eksiksiz model kökeni (HOLD).
+
 ## Gerçek cihaz (henüz HOLD)
 
 - [ ] Windows 11 Chrome stable panel açılışı.

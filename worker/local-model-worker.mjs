@@ -2,6 +2,8 @@
  * Kullanıcı eylemiyle başlar. Uzaktan model/JS isteği KAPALI.
  */
 import {createGenerationPlan,runGenerativePlan} from '../shared/generative-plan.mjs';
+import {browserModelStatus,openBrowserModelResponse} from '../shared/browser-model-store.mjs';
+import {STORE_KEY} from '../shared/browser-model-catalog.mjs';
 const ID='onnx-community/Qwen3-0.6B-Instruct-ONNX';
 const WEIGHT_SHAS={
  'onnx/model_q4f16.onnx':'4ad5a67d818b55749eb4cad425ca542a7aa9ea66eba11a0d31ab6b81f35a182d',
@@ -9,14 +11,26 @@ const WEIGHT_SHAS={
 };
 let runtime,model,loadedBackend,activeJob=null;
 function notify(jobId,type,payload={}){postMessage({jobId,type,...payload});}
-async function prepare(urls,preference,jobId){
+async function prepare(urls,preference,jobId,browserRecord){
  if(!runtime){
   try{runtime=await import('../vendor/transformers.runtime.mjs');}
   catch{throw new Error('RUNTIME_NOT_BUILT: npm run build:runtime gerekli.');}
  }
- const response=await fetch(urls.manifest,{cache:'no-store'});
- if(!response.ok)throw new Error('MODEL_NOT_INSTALLED: npm run model:install gerekli.');
- const manifest=await response.json();
+ let manifest;
+ let browserDeps=null;
+ if(browserRecord){
+  // Dedicated Worker uzantı chrome.storage API'lerini kullanabilir varsayılmaz;
+  // sayfanın doğruladığı küçük manifest kayıt olarak taşınır.
+  browserDeps={storage:navigator.storage,local:{get:async()=>({[STORE_KEY]:browserRecord})}};
+  const info=await browserModelStatus(browserDeps);
+  if(!info.ready)throw new Error('BROWSER_OPFS_MODEL_UNAVAILABLE: '+info.reason);
+  manifest={modelId:ID,revision:info.revision,license:browserRecord.license,
+   installation:'user-consented-local',backends:[info.backend],files:browserRecord.files};
+ }else{
+  const response=await fetch(urls.manifest,{cache:'no-store'});
+  if(!response.ok)throw new Error('MODEL_NOT_INSTALLED: paket içinde veya OPFS deposunda model yok.');
+  manifest=await response.json();
+ }
  if(manifest.modelId!==ID||manifest.installation!=='user-consented-local'||manifest.license!=='Apache-2.0')throw new Error('MODEL_MANIFEST_INVALID');
  const candidates=preference==='webgpu'?['webgpu']:preference==='wasm'?['wasm']:['webgpu','wasm'];
  const selected=candidates.find(candidate=>{
@@ -33,6 +47,35 @@ async function prepare(urls,preference,jobId){
  env.allowLocalModels=true;
  env.localModelPath=urls.modelBase;
  env.useBrowserCache=false;
+ if(browserDeps){
+  // Version 3.8.1 customCache arayüzü: match/put.
+  // Yerel URL aynı prefixe denk gelirse yalnızca doğrulanmış OPFS dosyası okunur.
+  const prefix=urls.modelBase+ID+'/';
+  const read=async input=>{
+   const address=typeof input==='string'?input:input?.url;
+   if(typeof address!=='string'||!address.startsWith(prefix))return undefined;
+   const path=decodeURIComponent(address.slice(prefix.length).split('?')[0]);
+   try{return await openBrowserModelResponse(path,{deps:browserDeps});}
+   catch{return undefined;}
+  };
+  env.useCustomCache=true;
+  env.customCache={match:read,async put(){throw new Error('REMOTE_MODEL_CACHE_DISABLED');}};
+  // Transformers.js 3.8.1'in önce fetch sonra custom cache deneme ihtimali
+  // için yalnızca yerel URL'leri OPFS Response'a yönlendir; diğer URL'ler
+  // orijinal fetch ile kalır. Gerçek runtime uyumluluğu HOLD.
+  const originalFetch=globalThis.fetch.bind(globalThis);
+  globalThis.fetch=async(input,options)=>{
+   const url=typeof input==='string'?input:input?.url;
+   if(typeof url==='string'&&url.startsWith(prefix)){
+    const response=await read(url);
+    if(!response)throw new Error('BROWSER_OPFS_FILE_MISSING');
+    return response;
+   }
+   return originalFetch(input,options);
+  };
+ }else{
+  env.useCustomCache=false;env.customCache=null;
+ }
  env.backends.onnx.wasm.wasmPaths=urls.wasmBase;
  notify(jobId,'loading',{stage:'MODEL_LOADING',backend:selected});
  model=await pipeline('text-generation',ID,{
@@ -49,7 +92,7 @@ async function run(message){
  if(activeJob)throw new Error('MODEL_BUSY');
  activeJob=jobId;
  try{
-  const {selected,manifest}=await prepare(urls,preference,jobId);
+  const {selected,manifest}=await prepare(urls,preference,jobId,message.browserRecord);
   const plan=createGenerationPlan(request.text,{title:request.title,difficulty:request.difficulty,
     targetWords:request.targetWords,maxChars:request.maxChars||3500});
   notify(jobId,'plan',{parts:plan.chunks.length,mode:plan.mode,backend:selected});
