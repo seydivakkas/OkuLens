@@ -13,3 +13,10 @@ models/
 *.safetensors
 *.bin
 *.gguf
+
+# Büyük kullanıcı onaylı modeller ve build çıktıları GitHub'a konmaz
+models/
+/vendor/ort/
+/vendor/transformers.runtime.mjs
+/vendor/runtime-build.json
+*.part
