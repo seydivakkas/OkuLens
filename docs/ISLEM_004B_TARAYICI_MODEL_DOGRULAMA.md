@@ -104,3 +104,8 @@ Linux Chromium veya Node birim testi Windows Chrome/Edge kabulünün yerine geç
 - [Chrome permissions API](https://developer.chrome.com/docs/extensions/reference/api/permissions)
 - [Transformers.js v3 API](https://huggingface.co/docs/transformers.js/v3.8.1/api/env)
 - [Qwen ONNX model](https://huggingface.co/onnx-community/Qwen3-0.6B-Instruct-ONNX)
+
+
+## Ek: İşlem 004-C bulgusu (18.10.2026)
+
+[İşlem 004-C](ISLEM_004C_CDN_METADATA_OPFS_RECOVERY.md) kapsamında dokuz metadata dosyasının SHA-256'sı bağımsız GitHub Actions indirmesinde hesaplanarak kataloğa pinlendi. WebGPU ve WASM ağırlıkları **indirilmeden**, HEAD ile `us.aws.cdn.hf.co` yönlendirmesi gözlendi. Bu host için kullanıcı isteğiyle verilen dar opsiyonel izin kodlandı. Sahipsiz OPFS model kurulumlarını kuru tarayan/onaylı temizleyen kod ve sentetik testler eklendi. Bunlar bu belgedeki Windows Chrome/Edge, gerçek yükleme ve çevrimdışı model kabul kapılarını **kapatmaz**.
