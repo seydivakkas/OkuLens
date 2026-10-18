@@ -1,11 +1,11 @@
 {
   "name": "okulens",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "description": "OkuLens MV3 hibrit yan panel, NLP stüdyosu ve yerel-öncelikli özetleme",
   "type": "module",
   "scripts": {
-    "check": "node --check background/service-worker.js && node --check content/injected.js && node --check panel/panel.js && node --check options/options.js && node --check shared/summarize.mjs && node --check shared/native-ai.mjs && node --check studio/studio.js && node --check shared/hybrid-nlp.mjs",
+    "check": "node --check background/service-worker.js && node --check content/injected.js && node --check panel/panel.js && node --check options/options.js && node --check shared/summarize.mjs && node --check shared/native-ai.mjs && node --check studio/studio.js && node --check shared/hybrid-nlp.mjs && node --check content/article-extractor.js && node --check vendor/readability/Readability.js",
     "test": "node --test tests/*.test.mjs"
   },
   "engines": {
