@@ -2,16 +2,26 @@
  * Her iş ayrı Worker üzerinde; iptal Worker.terminate() ile kesinleştirilir.
  * Bu yol model kurulu değilken sahte üretim gerçekleştirmez.
  */
+import {browserModelStatus} from './browser-model-store.mjs';
+
 function failure(code){const error=new Error(code);error.code=code;return error;}
 export async function localModelStatus(getURL=path=>chrome.runtime.getURL(path),fetcher=fetch){
  try{
   const response=await fetcher(getURL('models/model-manifest.json'),{cache:'no-store'});
-  if(!response.ok)return {ready:false,code:'MODEL_NOT_INSTALLED'};
+  if(!response.ok)throw new Error('PACKAGED_MODEL_NOT_INSTALLED');
   const manifest=await response.json();
   if(manifest.modelId!=='onnx-community/Qwen3-0.6B-Instruct-ONNX'||manifest.installation!=='user-consented-local')return {ready:false,code:'MODEL_MANIFEST_INVALID'};
   const present=manifest.backends||[];
   return {ready:present.length>0,backends:present,modelId:manifest.modelId,license:manifest.license,revision:manifest.revision};
- }catch{return {ready:false,code:'MODEL_NOT_INSTALLED'};}
+ }catch{
+  try{
+   const browser=await browserModelStatus();
+   if(browser.ready)return {ready:true,source:'browser-opfs',backends:[browser.backend],
+    modelId:browser.record.id,license:browser.record.license,revision:browser.revision,
+    warning:'Model dosyaları kayıtlı; gerçek ONNX inference ayrıca kabul edilmeli.'};
+  }catch{}
+  return {ready:false,code:'MODEL_NOT_INSTALLED'};
+ }
 }
 export function runLocalModel(request,{signal,onProgress=()=>{},workerFactory=()=>new Worker(new URL('../worker/local-model-worker.mjs',import.meta.url),{type:'module'}),getURL=path=>chrome.runtime.getURL(path)}={}){
  return new Promise((resolve,reject)=>{
@@ -37,7 +47,10 @@ export function runLocalModel(request,{signal,onProgress=()=>{},workerFactory=()
     if(msg.type==='done')finish(null,msg.result);
     if(msg.type==='error')finish(failure(msg.code||'MODEL_GENERATION_FAILED'));
    };
+   Promise.resolve().then(()=>browserModelStatus()).catch(()=>null).then(browser=>{
+   if(settled)return;
    worker.postMessage({
+    browserRecord:browser?.ready?browser.record:null,
     type:'GENERATE',jobId,
     urls:{
      modelBase:getURL('models/'),
@@ -53,6 +66,7 @@ export function runLocalModel(request,{signal,onProgress=()=>{},workerFactory=()
      maxChars:request.maxChars||3500
     }
    });
+   }).catch(e=>finish(e));
   }catch(e){finish(e);}
  });
 }
