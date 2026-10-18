@@ -59,7 +59,7 @@ el('browserInstall').addEventListener('click',async()=>{
  if(!size){el('browserProgressDetail').textContent='Desteklenmeyen backend.';return;}
  // Kullanıcı etkileşimi devam ederken yetki isteği başlatılır; asenkron
  // işlem başlatıldıktan sonra istemek Chrome kullanıcı jestini kaybedebilir.
- const permission=chrome.permissions.request({origins:['https://huggingface.co/*']});
+ const permission=chrome.permissions.request({origins:['https://huggingface.co/*','https://us.aws.cdn.hf.co/*']});
  setBrowserBusy(true);
  let controller=null;
  try{
