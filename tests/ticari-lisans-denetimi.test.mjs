@@ -17,6 +17,8 @@ function scenario({license='MIT',withNotice=true,withPackages=true}={}){
   mkdirSync(dep,{recursive:true});
   writeFileSync(join(dep,'package.json'),JSON.stringify({name:'demo-dependency',license,version:'1.0.0'}));
   if(withNotice)writeFileSync(join(dep,'LICENSE'),'Lisans metni sentetik test verisi.');
+  mkdirSync(join(cwd,'vendor'),{recursive:true});
+  writeFileSync(join(cwd,'vendor','runtime-inputs.json'),JSON.stringify({schemaVersion:1,inputs:['node_modules/demo-dependency/index.js']}));
  }
  const cleanup=()=>rmSync(cwd,{force:true,recursive:true});
  return {cwd,cleanup,run:(release=false)=>spawnSync(process.execPath,[script,...(release?['--release']:[])],{cwd,encoding:'utf8'})};
