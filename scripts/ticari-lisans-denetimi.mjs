@@ -54,6 +54,12 @@ function inspect(dir,seen){
  seen.add(key);
  const license=typeof pkg.license==='string'?pkg.license:pkg.license?.type??null;
  const files=readdirSync(dir).filter(x=>licenseFiles.test(x));
+ // ONNX Runtime npm paketleri bazen LICENSE dosyasını npm paketine dahil etmez.
+ // Resmî Microsoft MIT metni depodaki vendor/licenses'dan aynı lisans olarak taşınır.
+ const fallback=['onnxruntime-web','onnxruntime-common'].includes(pkg.name)
+   && license==='MIT'&&existsSync(join(root,'vendor','licenses','onnxruntime-MIT.txt'));
+ const legalFiles=files.map(x=>relative(root,join(dir,x)));
+ if(!legalFiles.length&&fallback)legalFiles.push('vendor/licenses/onnxruntime-MIT.txt');
  const state=legalStatus(license);
  const normalized=key.replaceAll('\\','/')+'/';
  const bundled=Boolean(bundleInputs?.some(name=>name.startsWith(normalized)));
@@ -61,19 +67,19 @@ function inspect(dir,seen){
  const wasm=pkg.name==='onnxruntime-web';
  const scope=bundled?'bundled-js':wasm?'bundled-wasm':'installed-only';
  const entry={name:pkg.name,version:pkg.version??null,license,classification:state,scope,
-  files:files.map(x=>relative(root,join(dir,x)))};
+  files:legalFiles};
  report.packages.push(entry);
  if(state!=='PERMISSIVE'){
   const code=state==='UNKNOWN'?'LICENSE_UNKNOWN':'LICENSE_REVIEW';
   finding(bundleInputs&&!bundled&&!wasm?code+'_INSTALLED_ONLY':code,key,'SPDX: '+String(license)+'; kapsam: '+scope);
  }
- if(!files.length)finding(bundleInputs&&!bundled&&!wasm?'LICENSE_NOTICE_MISSING_INSTALLED_ONLY':'LICENSE_NOTICE_MISSING',key,
+ if(!legalFiles.length)finding(bundleInputs&&!bundled&&!wasm?'LICENSE_NOTICE_MISSING_INSTALLED_ONLY':'LICENSE_NOTICE_MISSING',key,
   'Lisans/bildirim metni eksik; kapsam: '+scope);
  scan(join(dir,'node_modules'),seen);
 }
 const own=json(join(root,'package.json'));
 if(own.license!=='MIT')finding('OWN_LICENSE_CHANGED','package.json','Mevcut MIT lisans sözleşmesi değişti; sahibin kararı ve belge güncellemesi gerekli');
-for(const required of ['LICENSE','vendor/readability/LICENSE.md','vendor/readability/NOTICE',
+for(const required of ['LICENSE','vendor/readability/LICENSE.md','vendor/readability/NOTICE','vendor/licenses/onnxruntime-MIT.txt',
  'docs/THIRD_PARTY_MODELS.md','docs/TICARI_KULLANIM_POLITIKASI.md','docs/GIZLILIK_POLITIKASI_TASLAK.md']){
  if(!existsSync(join(root,required)))finding('REQUIRED_NOTICE_MISSING',required,'Ticari uygunluk dosyası eksik');
 }
