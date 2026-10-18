@@ -964,3 +964,32 @@ Beş kaynak odaklı test senaryosu vardır: 10 kelimelik mikro özet, 100 kelime
 Adım adım Windows komutları, GPU ölçüm talimatları ve kabul matrisi: [İşlem 004-A — Gerçek Model Kabul Protokolü](docs/ISLEM_004A_GERCEK_MODEL_KABUL.md).
 
 **Uyarı:** Model manifesti görünmesi dosya SHA kanıtı veya başarılı inference anlamına gelmez. `npm run model:verify` işlemi, gerçek Türkçe üretim, iki tarayıcıda yürütme, VRAM ve kaynak sadakati birbirinden bağımsız doğrulanmalıdır.
+
+
+---
+
+## Gelecekteki ticari ürün stratejisi — 18 Ekim 2026
+
+OkuLens bundan sonra **ticari dağıtım uyumluluğu gözetilerek** geliştirilecek. Zorunlu ücretli LLM API'si, kullanıcı hesabı ve bulut bağımlılığı eklenmeyecek. Uygulamadaki üçüncü taraf yazılım, model, font, ikon, görsel, veri seti ve platform erişimlerinin lisansları satıştan önce ayrıca doğrulanacak.
+
+**Önemli:** Repo MIT lisanslı olduğu için bu kod ücretsiz açık kaynak olarak kullanılabilir ve ayrıca ücretli sunulabilir; mevcut MIT kopyalarının haklarını daha sonra otomatik geri almak mümkün değildir. Kapalı kaynak gelecek sürümler ve katkıcı hakları için ayrı karar gerekir. Ticari satış için resmî hukuk görüşü ve yayımlama şartları ayrıca gereklidir.
+
+Yükleme ve lisans ön denetimi:
+
+```powershell
+npm install
+npm run commercial:check
+npm run check
+npm test
+```
+
+Üçüncü taraf metinlerini dağıtım adayı içine toplamak: `npm run commercial:notices`.
+Ticari sürüm kapısı: `npm run commercial:release-check` (**şu anda bilinçli olarak HOLD/FAIL**). Geliştirme CI'ının yeşil olması ticari yayın onayı değildir.
+
+Ticari uygunluk dosyaları:
+- [Ticari kullanım politikası ve lisans envanteri](docs/TICARI_KULLANIM_POLITIKASI.md)
+- [Gizlilik politikası — yayımlanmamış taslak](docs/GIZLILIK_POLITIKASI_TASLAK.md)
+- [Üçüncü taraf model ve runtime kayıtları](docs/THIRD_PARTY_MODELS.md)
+- [Dış katkı ve telif kökeni kuralları](CONTRIBUTING.md)
+
+**Mevcut riskler:** İlk 56 paketlik npm denetiminde LGPL-3.0-or-later lisanslı opsiyonel yerel paket ve eksik bildirim metinleri tespit edildi. Bunların gerçek tarayıcı uzantı paketine girip girmediği ayrıştırılmadan ücretli dağıtım ilan edilmeyecek. Gmail/Outlook/YouTube platform koşulları, mağaza veri beyanları, model lisans kökeni ve modelin gerçek Windows testi ayrı HOLD maddeleridir.
