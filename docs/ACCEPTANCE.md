@@ -20,6 +20,17 @@ Durum sözcükleri: `PASS` kanıtlı gerçek kabul; `PARTIAL` kapsam sınırlı;
 - [x] Gmail/Outlook/YouTube ayırıcıları için sentetik birim testleri.
 - [ ] Unit + e2e tarayıcı testleri (gerçek tarayıcı).
 
+## İşlem 004-E — Windows kabul ortam ve rapor paketi
+
+- [x] PowerShell üzerinden Chrome ve Edge ortam dosyalarını ayrı kaydeden hazırlık betiği geliştirildi.
+- [x] Veri taşıyan raporları yanlış PASS göstermeyen ve bağımsız kaynak/ağ/VRAM eksiğini açıklayan Node denetleyicisi geliştirildi.
+- [x] Kanıt klasörü Git takibinden çıkarıldı; Windows AST ve HOLD çalışma kontrolleri CI kapsamına alındı.
+- [ ] Kullanıcının gerçek Windows Chrome OPFS preflight ve tam ONNX üretim kanıtı (**HOLD**).
+- [ ] Kullanıcının gerçek Windows Edge OPFS preflight ve tam ONNX üretim kanıtı (**HOLD**).
+- [ ] Tam offline Türkçe 10/100/1000, streaming, RAM/VRAM, iki incelemeci kaynak sadakati (**HOLD**).
+
+[İşlem 004-E Windows kabul paketi](ISLEM_004E_WINDOWS_KABUL_KANIT_PAKETI.md)
+
 ## İşlem 004-D — OPFS Worker Dosya/URL Ön Kontrolü
 
 - [x] Yalnız paket içi model dosyalarını beyaz listeleyen, HTTP(S) uzak fetch'i engelleyen customCache adaptörü kodlandı.
