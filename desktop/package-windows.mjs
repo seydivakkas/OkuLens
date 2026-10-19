@@ -1,7 +1,7 @@
 /* Windows x64 tasinabilir Electron paketi.
  * Kurulum ve model indirme adimi yok; imza/SmartScreen kabulü ayrıdır.
  */
-import packager from '@electron/packager';
+import {packager} from '@electron/packager';
 import {resolve} from 'node:path';
 const root=resolve('.');
 const out=resolve('dist/desktop');
