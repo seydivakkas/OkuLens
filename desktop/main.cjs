@@ -56,7 +56,34 @@ function createWindow(){
    webSecurity:true
   }
  });
- mainWindow.once('ready-to-show',()=>mainWindow.show());
+ const smoke=process.argv.includes('--desktop-smoke');
+ if(!smoke)mainWindow.once('ready-to-show',()=>mainWindow.show());
+ if(smoke){
+  const timer=setTimeout(()=>{
+   console.error('DESKTOP_GUI_SMOKE_TIMEOUT');
+   process.exitCode=1;app.quit();
+  },25000);
+  mainWindow.webContents.once('did-finish-load',async()=>{
+   try{
+    const result=await mainWindow.webContents.executeJavaScript(
+     "(() => {const input=document.getElementById('source-text');" +
+     "input.value=Array.from({length:20},(_,i)=>'Bölüm '+i+' yerel metin özetleme işlemi internet gerektirmez. Kaynak cümleleri denetlenebilir.').join(' ');" +
+     "document.getElementById('summarize').click();" +
+     "return {text:document.getElementById('result-text').textContent," +
+     "engine:document.getElementById('engine').textContent," +
+     "count:document.getElementById('result-words').textContent};})()"
+    );
+    if(!result.text||!/Yerel çıkarımsal/.test(result.engine)||
+       !Number.isInteger(Number(result.count))||Number(result.count)<1)
+      throw new Error('DESKTOP_GUI_SMOKE_INVALID_SUMMARY');
+    console.log('DESKTOP_GUI_SMOKE_PASS: arayuz gercek Chromium penceresinde yerel ozet olusturdu.');
+    process.exitCode=0;
+   }catch(error){
+    console.error('DESKTOP_GUI_SMOKE_FAIL',error?.message);
+    process.exitCode=1;
+   }finally{clearTimeout(timer);app.quit();}
+  });
+ }
  mainWindow.webContents.setWindowOpenHandler(()=>({action:'deny'}));
  mainWindow.webContents.on('will-navigate',event=>event.preventDefault());
  mainWindow.loadURL('okulens://desktop/desktop/index.html');
