@@ -16,7 +16,8 @@
     "commercial:release-check": "node scripts/ticari-lisans-denetimi.mjs --release",
     "acceptance:audit": "node scripts/windows-acceptance-audit.mjs",
     "desktop:start": "electron .",
-    "desktop:pack:win": "node desktop/package-windows.mjs"
+    "desktop:pack:win": "node desktop/package-windows.mjs",
+    "desktop:smoke": "electron . --desktop-smoke"
   },
   "engines": {
     "node": ">=22.12.0"
