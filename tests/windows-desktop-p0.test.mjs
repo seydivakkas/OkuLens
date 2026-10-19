@@ -53,6 +53,9 @@ test('Electron masaüstü güvenliği Node, IPC ve dış ağı sınırlıyor',as
  assert.match(main,/desktop:save-summary/);
  assert.match(main,/validateSender/);
  assert.doesNotMatch(preload,/exposeInMainWorld\(['"]ipcRenderer/);
- assert.match(html,/connect-src 'none'/);
+ assert.match(html,/connect-src 'self'/);
+ assert.match(html,/worker-src 'self'/);
+ // Yerel WASM/model fetch için aynı origin gerekir; dış HTTP ana süreçte engellenir.
+ assert.match(main,/urls:\['http:\/\/\*\/\*','https:\/\/\*\/\*'\]/);
  assert.doesNotMatch(html,/<script[^>]+https?:\/\//);
 });
