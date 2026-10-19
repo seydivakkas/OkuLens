@@ -21,6 +21,9 @@ async function execute(message){
   env.useCustomCache=false;
   env.localModelPath='okulens://desktop/model-assets/'+backend+'/';
   env.backends.onnx.wasm.wasmPaths='okulens://desktop/vendor/ort/';
+  // Windows Electron içinde SharedArrayBuffer/COOP bağımlılığını kaldırır.
+  // Performans kararı gerçek CPU/WASM kabulünde tekrar ölçülmelidir.
+  env.backends.onnx.wasm.numThreads=1;
   emit(jobId,'stage',{stage:'MODEL_LOADING',backend});
   const generator=await pipeline('text-generation',ID,{
    device:backend,
