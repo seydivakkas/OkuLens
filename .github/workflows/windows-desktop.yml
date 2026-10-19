@@ -29,6 +29,8 @@ jobs:
         run: |
           npm run check
           npm test
+      - name: Yerel Transformers.js runtime ve ONNX WASM olustur
+        run: npm run build:runtime
       - name: Electron Windows GUI gercek ozetleme smoke testi
         run: npm run desktop:smoke
       - name: Windows x64 tasinabilir exe olustur
