@@ -1,0 +1,39 @@
+name: OkuLens Windows kabul betiği kontrolü
+on:
+  pull_request:
+    paths:
+      - "scripts/windows-kabul-hazirlik.ps1"
+      - ".github/workflows/windows-kabul-betik-ci.yml"
+  push:
+    branches:
+      - "feature/islem-004e-windows-kabul-kanit"
+jobs:
+  windows-betik:
+    runs-on: windows-latest
+    timeout-minutes: 12
+    steps:
+      - name: Kaynak kodunu al
+        uses: actions/checkout@v4
+      - name: PowerShell AST sözdizimi
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          $path = (Resolve-Path 'scripts/windows-kabul-hazirlik.ps1').Path
+          $null = [System.Management.Automation.Language.Parser]::ParseFile($path, [ref]$tokens, [ref]$errors)
+          if ($errors.Count -ne 0) { $errors | Format-List | Out-String | Write-Error; exit 1 }
+          Write-Output 'Windows betigi sozdizimi PASS; gercek uzanti/ONNX testi yapilmadi.'
+      - name: Windows Chrome/Edge ortam raporu sahte PASS vermiyor
+        shell: pwsh
+        run: |
+          ./scripts/windows-kabul-hazirlik.ps1 -Tarayici Chrome
+          ./scripts/windows-kabul-hazirlik.ps1 -Tarayici Edge
+          foreach ($browser in @('chrome','edge')) {
+            $path = "kanitlar/okulens-windows-$browser-ortam.json"
+            if (-not (Test-Path $path)) { throw "MISSING_ENVIRONMENT_REPORT: $browser" }
+            $report = Get-Content $path -Raw | ConvertFrom-Json
+            if ($report.decision -ne 'HOLD' -or $report.offlineInferenceVerified -ne $false) {
+              throw "FALSE_MODEL_PASS: $browser"
+            }
+          }
+          Write-Output 'Windows betik davranisi PASS; model cihaz kabulu HOLD.'
