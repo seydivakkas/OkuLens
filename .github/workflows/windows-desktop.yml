@@ -29,6 +29,8 @@ jobs:
         run: |
           npm run check
           npm test
+      - name: Electron Windows GUI gercek ozetleme smoke testi
+        run: npm run desktop:smoke
       - name: Windows x64 tasinabilir exe olustur
         run: npm run desktop:pack:win
       - name: EXE varligini denetle ve zip paketi hazirla
