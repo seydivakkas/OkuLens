@@ -2,6 +2,18 @@
 
 Durum sözcükleri: `PASS` kanıtlı gerçek kabul; `PARTIAL` kapsam sınırlı; `HOLD` kanıt yok; `FAIL` testte ihlal.
 
+## Windows masaüstü W-P1 — Yerel Qwen/ONNX entegrasyonu
+
+- [x] Sabitlenmiş Qwen model katalog SHA değerlerini yeniden kullanan Windows AppData model deposu kodlandı.
+- [x] İsteğe bağlı model indirme, metadata SHA, iptal ve geçici klasör sözleşmesi geliştirildi.
+- [x] TextRank motoru korunarak gerçek Transformers.js WebGPU/WASM pipeline Worker adayına bağlandı.
+- [x] Electron IPC/yol beyaz listesi ve yerel WASM/runtime paketleme sözleşmesi eklendi.
+- [ ] Gerçek Windows kullanıcı cihazında Qwen WebGPU ve WASM ONNX yükleme/doğrulanmış Türkçe çıktı (**HOLD**).
+- [ ] Ağ kapalı 10/100/1000 üretim, streaming, RAM/VRAM ve bağımsız kaynak sadakati (**HOLD**).
+- [ ] İmzalı Windows installer ve ticari yayımlama (**HOLD**).
+
+[İşlem 006 W-P1 kanıt belgesi](ISLEM_006_WINDOWS_WP1_YEREL_QWEN_ONNX.md)
+
 ## Yeni ana ürün: Windows Masaüstü P0 (İşlem 005)
 
 **Öncelik değişti:** OkuLens önce Windows EXE/portable ZIP olarak geliştirilecektir. Aşağıdaki Chrome/Edge OPFS kabulleri korunmuş tarihsel uzantı doğrulama kayıtlarıdır; Windows P0 sürümünün bir önkoşulu değildir.
