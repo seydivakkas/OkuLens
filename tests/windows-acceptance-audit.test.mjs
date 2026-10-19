@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {assessWindowsEvidence} from '../scripts/windows-acceptance-audit.mjs';
+import {mkdtempSync,writeFileSync,readFileSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 
 const identity='onnx-community/Qwen3-0.6B-Instruct-ONNX';
 function evidence(data){return {data,sha256:'f'.repeat(64)};}
@@ -69,4 +74,34 @@ test('ortam raporunun PASS iddiası reddedilir',()=>{
  const r=assessWindowsEvidence({environment:x});
  assert.equal(r.environment.validated,false);
  assert.ok(r.environment.issues.includes('ENVIRONMENT_MUST_NOT_CLAIM_PASS'));
+});
+
+test('komut satırı gerçek JSON dosyalarından HOLD denetim raporu üretir',()=>{
+ const folder=mkdtempSync(join(tmpdir(),'okulens-evidence-'));
+ try{
+  const environment=join(folder,'environment.json'),output=join(folder,'audit.json');
+  writeFileSync(environment,JSON.stringify(env().data),'utf8');
+  const script=fileURLToPath(new URL('../scripts/windows-acceptance-audit.mjs',import.meta.url));
+  const result=spawnSync(process.execPath,[script,'--environment',environment,'--output',output],
+   {encoding:'utf8'});
+  assert.equal(result.status,0,result.stderr);
+  const audit=JSON.parse(readFileSync(output,'utf8'));
+  assert.equal(audit.decision,'HOLD');
+  assert.equal(audit.environment.validated,true);
+  assert.equal(audit.preflight.validated,false);
+  assert.deepEqual(audit.missingCases,['micro','standard','deep','simple','injected']);
+  assert.doesNotMatch(result.stdout,/Örnek gerçek model çıktısı/);
+ }finally{rmSync(folder,{recursive:true,force:true});}
+});
+test('bozuk kanıt dosyası komut satırında hata verir, başarılı rapor üretmez',()=>{
+ const folder=mkdtempSync(join(tmpdir(),'okulens-invalid-'));
+ try{
+  const environment=join(folder,'corrupt.json'),output=join(folder,'audit.json');
+  writeFileSync(environment,'not json','utf8');
+  const script=fileURLToPath(new URL('../scripts/windows-acceptance-audit.mjs',import.meta.url));
+  const result=spawnSync(process.execPath,[script,'--environment',environment,'--output',output],
+   {encoding:'utf8'});
+  assert.equal(result.status,2);
+  assert.match(result.stderr,/EVIDENCE_INVALID_JSON/);
+ }finally{rmSync(folder,{recursive:true,force:true});}
 });
