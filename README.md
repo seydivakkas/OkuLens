@@ -12,6 +12,12 @@
 
 ---
 
+## W-P1 — Yerel Qwen/ONNX Windows entegrasyonu (kod adayı)
+
+[İşlem 006 Windows W-P1](docs/ISLEM_006_WINDOWS_WP1_YEREL_QWEN_ONNX.md) ile Windows masaüstüne seçilebilir Qwen3 ONNX modeli eklendi. Model kullanıcı onayıyla Windows AppData'ya streaming indirilir; dokuz metadata ve bir ağırlığın sabit SHA-256 değerleri doğrulanır. Uygulama **TextRank** motorunu korur; **Qwen/ONNX** üretimi ayrı Worker'da WebGPU/WASM ile denenir ve hata varsa sahte sonuç yerine hata gösterilir. Haricî API anahtarı veya bulut inference yoktur.
+
+**Kabul sınırı:** Windows CI'nin paketli JS/WASM doğrulaması, 648/997 MB gerçek model ağırlığının çalıştığı anlamına gelmez. **Gerçek Windows ONNX, çevrimdışı Türkçe 10/100/1000, kaynak sadakati, RAM/VRAM ve ticari yayın HOLD.**
+
 ## Önceki Chrome/Edge uzantısı mimarisi (korunan referans)
 
 Aşağıdaki özellik/plan açıklamaları önceki MV3 uzantısı için geçerlidir. Yeni Windows P0'ın kurulu veya kabul edilmiş özelliği gibi okunmamalıdır.
