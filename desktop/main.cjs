@@ -21,6 +21,7 @@ const ASSETS=new Map([
  ['/desktop/renderer.mjs','text/javascript; charset=utf-8'],
  ['/desktop/summary-core.mjs','text/javascript; charset=utf-8'],
  ['/desktop/model-worker.mjs','text/javascript; charset=utf-8'],
+ ['/desktop/onnx-client.mjs','text/javascript; charset=utf-8'],
  ['/shared/generative-plan.mjs','text/javascript; charset=utf-8'],
  ['/vendor/transformers.runtime.mjs','text/javascript; charset=utf-8'],
  ['/shared/summarize.mjs','text/javascript; charset=utf-8'],
