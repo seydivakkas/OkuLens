@@ -38,6 +38,11 @@ jobs:
         run: |
           $exe = Get-ChildItem -Path "dist/desktop" -Filter "OkuLens.exe" -File -Recurse | Select-Object -First 1
           if ($null -eq $exe -or $exe.Length -le 0) { throw "DESKTOP_EXE_MISSING" }
+          # Paket icindeki gercek exe, asar ve protokol dosyalarini okuyarak
+          # Windows renderer'da ayni metin ozetleme duman testini calistirir.
+          $p = Start-Process -FilePath $exe.FullName -ArgumentList "--desktop-smoke" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "PACKAGED_DESKTOP_GUI_SMOKE_FAIL: $($p.ExitCode)" }
+          Write-Output "PACKAGED_DESKTOP_GUI_SMOKE_PASS"
           $folder = $exe.Directory.FullName
           $zip = Join-Path (Resolve-Path "dist").Path "OkuLens-Windows-x64-portable.zip"
           Compress-Archive -Path (Join-Path $folder "*") -DestinationPath $zip -CompressionLevel Optimal -Force
