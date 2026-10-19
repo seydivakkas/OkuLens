@@ -95,7 +95,7 @@ $name = 'okulens-windows-' + $Tarayici.ToLowerInvariant() + '-ortam.json'
 $destination = Join-Path (Resolve-Path $CiktiKlasoru).Path $name
 $json = $report | ConvertTo-Json -Depth 8
 [IO.File]::WriteAllText($destination,$json + [Environment]::NewLine,
-    (New-Object System.Text.UTF8Encoding $false))
+    ([System.Text.UTF8Encoding]::new($false)))
 Write-Host ('Ortam kaydi olusturuldu: ' + $destination)
 if (-not $exe) {
     Write-Warning ('Tarayici bulunamadi: ' + $Tarayici + '. Ortam ve model kabulu HOLD.')
