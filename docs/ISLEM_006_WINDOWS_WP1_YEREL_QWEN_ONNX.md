@@ -24,6 +24,8 @@
 - Paketli JS/WASM'ın varlığı, gerçek Windows ONNX pipeline veya sıfır ağ trafiği kanıtı değildir.
 - Windows GPU/VRAM, CPU/WASM, Türkçe model kalitesi, kaynak sadakati, streaming ve fiziksel kullanıcı kabulü henüz HOLD.
 
+**Git dalı uyarısı:** PR #18 ana dala birleştirilene kadar aşağıdaki main komutları W-P1 kodunu içermez. PR taslak inceleme aşamasındadır; gerçek Windows için önce CI kontrolleri ve güvenli birleştirme gereklidir.
+
 ## Windows PowerShell — tek blok
 
 OkuLens klasörü HOME altında değilse ilk satırı düzenle. Git ve Node.js 22.12+ kurulu olmalı.
