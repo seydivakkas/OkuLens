@@ -68,6 +68,27 @@ Windows'ta proje klasöründe npm.cmd run desktop:pack:win komutu portable EXE k
 
 P0 paket kod imzası, SmartScreen/Defender fiziksel kabulü, installer, otomatik güncelleme, bağımsız güvenlik taraması ve gerçek müşteri verisi kullanımını tamamlamamıştır. Bu testler son aşamada yapılacak.
 
+## 5-A. Windows GitHub Actions somut CI kanıtı
+
+[Windows P0 CI çalışması](https://github.com/seydivakkas/OkuLens/actions/runs/39269375881) üzerinde aşağıdakiler gözlendi:
+
+- Node sentetik testleri: 106/106 PASS.
+- Windows Electron uygulaması gerçek Chromium renderer ile çalıştırıldı: DESKTOP_GUI_SMOKE_PASS; Türkçe örnek metin yerel motorla özetlendi.
+- @electron/packager ile Windows x64 klasörü ve OkuLens.exe gerçekten oluşturuldu.
+- Taşınabilir Windows ZIP, GitHub Actions artefaktı olarak saklandı. GitHub Actions **Artifacts → OkuLens-Windows-x64-portable** bölümünden edinilebilir.
+
+**Bu, kullanıcının bilgisayarında çalıştırılmış/yayınlanmış uygulama veya gerçek ONNX üretimi anlamına gelmez.** GitHub runner fiziksel Windows kullanıcı kabulünü, kaynak sadakatini, SmartScreen/kod imzasını, internet bağlantısı kapalı laboratuvarı ve müşteri ortamını ikame etmez.
+
+### Node/Git kurmadan portable adayın ilk denemesi
+
+1. Yukarıdaki GitHub Actions çalışmasını açıp Artifacts kısmındaki Windows portable ZIP'i indir.
+2. GitHub artefakt ZIP'ini ve onun içindeki portable ZIP'i ayrı ayrı çıkar.
+3. Çıkan klasörün içinde yer alan OkuLens.exe dosyasını klasörü bozmadan başlat.
+4. Metin yapıştır → 100 kelime → Yerel özeti oluştur → TXT kaydet akışını dene.
+5. Sonra ağ bağlantısını kesip aynı yerel metin özetini tekrar dene. Uygulamanın yüklenmesi/harici trafik, Windows güvenlik uyarıları ve kullanıcı kabulleri ayrı raporlanmalıdır.
+
+Windows imzasız geliştirme paketi güvenlik uyarısı verirse korumaları sistem genelinde devre dışı bırakmayın; güvenilirlik doğrulaması ayrı yayına hazırlık aşamasında yapılacak.
+
 ## 6. Gelecek mühendislik sırası
 
 1. **W-P0:** Windows iki panelli GUI, güvenli metin açma/özetleme/TXT kaydetme, Windows CI üzerinde EXE/portable ZIP üretimi.
