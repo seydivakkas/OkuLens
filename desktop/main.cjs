@@ -101,6 +101,14 @@ function createWindow(){
   },25000);
   mainWindow.webContents.once('did-finish-load',async()=>{
    try{
+    // Gerçek model indirmeden, paket içi Transformers.js JS ve ORT WASM
+    // dosyalarının EXE/asar içinde yer aldığını kontrol et.
+    const rt=await fs.stat(path.join(ROOT,'vendor','transformers.runtime.mjs'));
+    const wasm=await fs.readdir(path.join(ROOT,'vendor','ort'));
+    if(rt.size<1000||!wasm.some(x=>x.endsWith('.wasm')))throw new Error('DESKTOP_ONNX_RUNTIME_ASSETS_MISSING');
+    const store=await modelOps();
+    if(typeof store.desktopModelStatus!=='function')throw new Error('DESKTOP_MODEL_STORE_UNAVAILABLE');
+    console.log('DESKTOP_ONNX_RUNTIME_ASSETS_PRESENT (not inference proof)');
     const result=await mainWindow.webContents.executeJavaScript(
      "(() => {const input=document.getElementById('source-text');" +
      "input.value=Array.from({length:20},(_,i)=>'Bölüm '+i+' yerel metin özetleme işlemi internet gerektirmez. Kaynak cümleleri denetlenebilir.').join(' ');" +
