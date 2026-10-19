@@ -25,3 +25,6 @@ models/
 /vendor/ticari-lisanslar/
 
 /vendor/runtime-inputs.json
+
+# Windows kabul yerel kanitlari: kullanici verisi veya HAR icerebilir
+/kanitlar/
