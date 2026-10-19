@@ -1,7 +1,8 @@
 /* OkuLens Windows masaüstü P0 — yalnızca paketli kaynaklar ve kullanıcı seçimi.
  * Node API'leri DOM'a sunulmaz; renderer sandbox ve contextIsolation etkindir.
  */
-const {app,BrowserWindow,dialog,ipcMain,protocol,session}=require('electron');
+const {app,BrowserWindow,dialog,ipcMain,protocol,session,net}=require('electron');
+const {pathToFileURL}=require('node:url');
 const fs=require('node:fs/promises');
 const path=require('node:path');
 const {TextDecoder}=require('node:util');
@@ -11,11 +12,18 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 const ROOT=path.resolve(__dirname,'..');
+const modelRoot=()=>path.join(app.getPath('userData'),'qwen-models');
+const modelOps=()=>import('./model-store.mjs');
+let modelTask=null;
 const ASSETS=new Map([
  ['/desktop/index.html','text/html; charset=utf-8'],
  ['/desktop/style.css','text/css; charset=utf-8'],
  ['/desktop/renderer.mjs','text/javascript; charset=utf-8'],
  ['/desktop/summary-core.mjs','text/javascript; charset=utf-8'],
+ ['/desktop/model-worker.mjs','text/javascript; charset=utf-8'],
+ ['/desktop/onnx-client.mjs','text/javascript; charset=utf-8'],
+ ['/shared/generative-plan.mjs','text/javascript; charset=utf-8'],
+ ['/vendor/transformers.runtime.mjs','text/javascript; charset=utf-8'],
  ['/shared/summarize.mjs','text/javascript; charset=utf-8'],
  ['/shared/hybrid-nlp.mjs','text/javascript; charset=utf-8']
 ]);
@@ -36,6 +44,34 @@ function safeAsset(requestUrl){
   mime:ASSETS.get(url.pathname)};
 }
 async function respondAsset(request){
+ // Model / WASM dosyaları yalnız sabit uygulama kaynağından, manifestteki
+ // denetlenmiş dosya adlarından ve Electron kullanıcı AppData deposundan gelir.
+ let url;
+ try{url=new URL(request.url);}catch{return new Response('URL hatası',{status:400});}
+ if(url.protocol!=='okulens:'||url.hostname!=='desktop'||
+   url.username||url.password||url.search||url.hash)return new Response('Engellendi',{status:403});
+ if(url.pathname.startsWith('/model-assets/')){
+  const rest=url.pathname.slice('/model-assets/'.length);
+  const matched=/^(webgpu|wasm)\/onnx-community\/Qwen3-0\.6B-Instruct-ONNX\/([A-Za-z0-9_.\/-]+)$/.exec(rest);
+  if(!matched)return new Response('Model yolu engellendi',{status:404});
+  const [,backend,relative]=matched;
+  const {modelFileForRequest}=await modelOps();
+  const filepath=await modelFileForRequest(modelRoot(),backend,relative);
+  if(!filepath)return new Response('Model kurulu değil',{status:404});
+  try{
+   const response=await net.fetch(pathToFileURL(filepath).href);
+   return response.ok?response:new Response('Model dosyası okunamadı',{status:404});
+  }catch{return new Response('Model dosyası okunamadı',{status:404});}
+ }
+ if(url.pathname.startsWith('/vendor/ort/')){
+  const file=url.pathname.slice('/vendor/ort/'.length);
+  if(!/^ort-wasm[a-zA-Z0-9_.-]*\.(?:wasm|mjs)$/.test(file))return new Response('Dosya engellendi',{status:404});
+  try{
+   const data=await fs.readFile(path.join(ROOT,'vendor','ort',file));
+   return new Response(data,{headers:{'Content-Type':file.endsWith('.wasm')?'application/wasm':'text/javascript','X-Content-Type-Options':'nosniff'}});
+  }catch{return new Response('Yerel WASM dosyası yok',{status:404});}
+ }
+
  const asset=safeAsset(request.url);
  if(!asset)return new Response('Kaynak bulunamadi',{status:404});
  try{
@@ -65,6 +101,14 @@ function createWindow(){
   },25000);
   mainWindow.webContents.once('did-finish-load',async()=>{
    try{
+    // Gerçek model indirmeden, paket içi Transformers.js JS ve ORT WASM
+    // dosyalarının EXE/asar içinde yer aldığını kontrol et.
+    const rt=await fs.stat(path.join(ROOT,'vendor','transformers.runtime.mjs'));
+    const wasm=await fs.readdir(path.join(ROOT,'vendor','ort'));
+    if(rt.size<1000||!wasm.some(x=>x.endsWith('.wasm')))throw new Error('DESKTOP_ONNX_RUNTIME_ASSETS_MISSING');
+    const store=await modelOps();
+    if(typeof store.desktopModelStatus!=='function')throw new Error('DESKTOP_MODEL_STORE_UNAVAILABLE');
+    console.log('DESKTOP_ONNX_RUNTIME_ASSETS_PRESENT (not inference proof)');
     const result=await mainWindow.webContents.executeJavaScript(
      "(() => {const input=document.getElementById('source-text');" +
      "input.value=Array.from({length:20},(_,i)=>'Bölüm '+i+' yerel metin özetleme işlemi internet gerektirmez. Kaynak cümleleri denetlenebilir.').join(' ');" +
@@ -88,6 +132,50 @@ function createWindow(){
  mainWindow.webContents.on('will-navigate',event=>event.preventDefault());
  mainWindow.loadURL('okulens://desktop/desktop/index.html');
  mainWindow.on('closed',()=>{mainWindow=null;});
+}
+function registerModelIPC(){
+ const authorized=e=>validateSender(e);
+ ipcMain.handle('desktop:model-status',async(e,backend)=>{
+  authorized(e);return (await modelOps()).desktopModelStatus(modelRoot(),backend);
+ });
+ ipcMain.handle('desktop:model-install',async(e,backend,consent)=>{
+  authorized(e);
+  if(consent!==true)throw new Error('MODEL_EXPLICIT_CONSENT_REQUIRED');
+  if(modelTask)throw new Error('MODEL_OPERATION_BUSY');
+  const controller=new AbortController();
+  modelTask=controller;
+  try{
+   const ops=await modelOps();
+   return await ops.installDesktopModel(modelRoot(),backend,{
+    signal:controller.signal,
+    onProgress:progress=>{
+     if(!mainWindow?.isDestroyed())mainWindow.webContents.send('desktop:model-progress',progress);
+    }
+   });
+  }finally{modelTask=null;}
+ });
+ ipcMain.handle('desktop:model-cancel',async(e)=>{
+  authorized(e);
+  if(!modelTask)return {cancelled:false};
+  modelTask.abort();
+  return {cancelled:true};
+ });
+ ipcMain.handle('desktop:model-verify',async(e,backend)=>{
+  authorized(e);
+  if(modelTask)throw new Error('MODEL_OPERATION_BUSY');
+  const controller=new AbortController();modelTask=controller;
+  try{return await (await modelOps()).verifyDesktopModel(modelRoot(),backend,{
+   signal:controller.signal,
+   onProgress:progress=>{
+    if(!mainWindow?.isDestroyed())mainWindow.webContents.send('desktop:model-progress',progress);
+   }
+  });}finally{modelTask=null;}
+ });
+ ipcMain.handle('desktop:model-remove',async(e,backend,confirmed)=>{
+  authorized(e);
+  if(modelTask)throw new Error('MODEL_OPERATION_BUSY');
+  return (await modelOps()).removeDesktopModel(modelRoot(),backend,{confirmed});
+ });
 }
 function registerIPC(){
  ipcMain.handle('desktop:open-text',async(event)=>{
@@ -129,6 +217,7 @@ app.whenReady().then(async()=>{
  );
  protocol.handle('okulens',respondAsset);
  registerIPC();
+ registerModelIPC();
  createWindow();
 }).catch(error=>{console.error('DESKTOP_START_FAILED',error?.message);app.quit();});
 app.on('window-all-closed',()=>app.quit());

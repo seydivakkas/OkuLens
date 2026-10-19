@@ -2,7 +2,7 @@
 
 **Güncel mühendislik kararı (19 Ekim 2026):** OkuLens'in ana sürümü **Windows masaüstü uygulamasıdır**. Chrome/Edge uzantısı ileride isteğe bağlı ek özellik olarak değerlendirilecektir. Önceki uzantı kodları ve belgeleri silinmemiştir fakat ilk sürümün çalışma şartı değildir.
 
-**Windows P0:** Çevrimdışı TF-IDF + TextRank özetleme; metin yapıştırma, TXT/MD dosya açma, 10/100/1000 kelime bütçesi, özet ve anahtar kelimeler, TXT olarak kaydetme. **Bu aşamada gerçek ONNX/GGUF üretimi yoktur.** Haricî LLM API'si, API anahtarı ve zorunlu hesap bulunmaz. Gerçek Windows cihaz ve ticari yayın kabulü **HOLD**.
+**Windows P0:** Çevrimdışı TF-IDF + TextRank özetleme; metin yapıştırma, TXT/MD dosya açma, 10/100/1000 kelime bütçesi, özet ve anahtar kelimeler, TXT olarak kaydetme. **P0'un güvenilir varsayılan motoru TextRank'tir; W-P1'de ONNX gerçek çıkarım yolu kod adayıdır, fiziksel Windows ONNX doğrulaması henüz HOLD.** Haricî LLM API'si, API anahtarı ve zorunlu hesap bulunmaz. Gerçek Windows cihaz ve ticari yayın kabulü **HOLD**.
 
 **Tek komutla geliştirme penceresi:** npm install sonrasında npm run desktop:start. Windows portable EXE aday paketi: npm run desktop:pack:win. Entegrasyon, kurulum ve güvenlik ayrıntıları için [İşlem 005 Windows Desktop P0](docs/ISLEM_005_WINDOWS_DESKTOP_P0.md).
 
@@ -11,6 +11,12 @@
 **W-P0 Windows arayüzü → W-P1 yerel ONNX motoru → W-P2 gerçek offline Türkçe ve kaynak kanıtı → W-P3 PDF/DOCX → W-P4 imzalı Windows dağıtımı → E-OPTIONAL uzantı.**
 
 ---
+
+## W-P1 — Yerel Qwen/ONNX Windows entegrasyonu (kod adayı)
+
+[İşlem 006 Windows W-P1](docs/ISLEM_006_WINDOWS_WP1_YEREL_QWEN_ONNX.md) ile Windows masaüstüne seçilebilir Qwen3 ONNX modeli eklendi. Model kullanıcı onayıyla Windows AppData'ya streaming indirilir; dokuz metadata ve bir ağırlığın sabit SHA-256 değerleri doğrulanır. Uygulama **TextRank** motorunu korur; **Qwen/ONNX** üretimi ayrı Worker'da WebGPU/WASM ile denenir ve hata varsa sahte sonuç yerine hata gösterilir. Haricî API anahtarı veya bulut inference yoktur.
+
+**Kabul sınırı:** Windows CI'nin paketli JS/WASM doğrulaması, 648/997 MB gerçek model ağırlığının çalıştığı anlamına gelmez. **Gerçek Windows ONNX, çevrimdışı Türkçe 10/100/1000, kaynak sadakati, RAM/VRAM ve ticari yayın HOLD.**
 
 ## Önceki Chrome/Edge uzantısı mimarisi (korunan referans)
 

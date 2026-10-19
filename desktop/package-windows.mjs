@@ -19,7 +19,7 @@ const result=await packager({
  ignore:[
   /[/\\]\.git(?:[/\\]|$)/,
   /[/\\](?:\.github|tests|docs|kanitlar|models|coverage|dist)(?:[/\\]|$)/,
-  /[/\\]vendor[/\\](?:ort|runtime-inputs\.json|runtime-build\.json|transformers\.runtime\.mjs)/,
+  /[/\\]vendor[/\\](?:runtime-inputs\.json|runtime-build\.json)/,
   /[/\\]package-lock\.json\.bak$/
  ]
 });
