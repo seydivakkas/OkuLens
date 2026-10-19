@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="tr">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1">
+ <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+ <title>OkuLens · Windows</title>
+ <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+ <div class="shell">
+  <aside class="sidebar">
+   <div class="logo"><div class="mark">O</div><div><strong>OkuLens</strong><span>Windows Masaüstü</span></div></div>
+   <div class="nav">
+    <div class="nav-active">Metin özetleme</div>
+    <div class="nav-pending">Yerel ONNX <span>sonraki aşama</span></div>
+    <div class="nav-pending">PDF / DOCX <span>planlandı</span></div>
+   </div>
+   <div class="sidebar-bottom"><span class="dot"></span> Çevrimdışı yerel motor
+    <p>Uzantı gerektirmez. Hesap ve API anahtarı istemez.</p>
+   </div>
+  </aside>
+  <main class="main">
+   <header>
+    <div><p class="eyebrow">MASAÜSTÜ · P0</p><h1>Metinlerini kendi bilgisayarında özetle.</h1>
+     <p class="sub">Dosya aç, metin yapıştır ve kaynağından kopmadan özetini oluştur.</p></div>
+    <span class="chip">Yerel TF-IDF + TextRank</span>
+   </header>
+   <div class="workarea">
+    <section class="panel source">
+     <div class="panel-heading"><div><span class="step">01</span><h2>Kaynak metin</h2></div><span id="source-count" class="muted">0 kelime</span></div>
+     <div class="actions">
+      <button id="open" type="button" class="secondary">Metin dosyası aç (.txt / .md)</button>
+      <button id="clear" type="button" class="ghost">Temizle</button>
+     </div>
+     <label for="source-title">Belge başlığı</label>
+     <input id="source-title" type="text" maxlength="300" placeholder="İsteğe bağlı başlık">
+     <label for="source-text">İçerik</label>
+     <textarea id="source-text" maxlength="260000" placeholder="Buraya Türkçe veya İngilizce bir metin yapıştırabilir ya da üstteki düğmeyle yerel bir dosya açabilirsin."></textarea>
+     <div class="settings"><div><label for="length">Özet uzunluğu</label>
+       <select id="length"><option value="10">10 kelime — kısa</option><option value="100" selected>100 kelime — standart</option><option value="1000">1000 kelime — uzun</option></select></div>
+       <div class="hint">Kelime hedefi azami bütçedir; kaynak kısaysa içerik uydurulmaz.</div></div>
+     <button id="summarize" class="primary" type="button">Yerel özeti oluştur <span aria-hidden="true">→</span></button>
+    </section>
+    <section class="panel result">
+     <div class="panel-heading"><div><span class="step">02</span><h2>Özet</h2></div><span id="engine" class="muted">Henüz oluşturulmadı</span></div>
+     <div id="empty" class="empty"><div class="empty-icon">✦</div>
+       <strong>Özet burada görünecek</strong><p>Metnini ekleyip “Yerel özeti oluştur” düğmesine bas.</p>
+     </div>
+     <div id="result-content" hidden>
+      <div class="metrics"><div><strong id="result-words">—</strong><small>Özet kelimesi</small></div>
+       <div><strong id="compression">—</strong><small>Kısalma</small></div>
+       <div><strong id="duration">—</strong><small>İşlem süresi</small></div></div>
+      <p id="result-text" class="result-text"></p>
+      <div class="result-footer"><button type="button" id="copy" class="secondary">Özeti kopyala</button>
+       <button type="button" id="save" class="secondary">TXT olarak kaydet</button></div>
+      <h3>Öne çıkan anahtar kelimeler</h3><div id="keywords" class="keywords"></div>
+      <p class="notice">Özet, kaynak cümlelerinden seçilerek oluşturulur. Üretken yeniden yazım veya doğrulanmış ONNX çıktısı değildir.</p>
+      <p id="warnings" class="warnings"></p>
+     </div>
+    </section>
+   </div>
+   <footer><span id="status" role="status" aria-live="polite">Hazır. Veriler bu uygulamanın dışında otomatik gönderilmez.</span><span>P0 · Windows ön sürüm · yerel model kabulü bekleniyor</span></footer>
+  </main>
+ </div>
+ <script type="module" src="./renderer.mjs"></script>
+</body>
+</html>

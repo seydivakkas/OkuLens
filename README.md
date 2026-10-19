@@ -1,4 +1,22 @@
-# OkuLens — Yerel Yapay Zekâ Destekli Tarayıcı Okuma ve Özetleme Asistanı
+# OkuLens — Windows Masaüstü (Öncelikli Ürün)
+
+**Güncel mühendislik kararı (19 Ekim 2026):** OkuLens'in ana sürümü **Windows masaüstü uygulamasıdır**. Chrome/Edge uzantısı ileride isteğe bağlı ek özellik olarak değerlendirilecektir. Önceki uzantı kodları ve belgeleri silinmemiştir fakat ilk sürümün çalışma şartı değildir.
+
+**Windows P0:** Çevrimdışı TF-IDF + TextRank özetleme; metin yapıştırma, TXT/MD dosya açma, 10/100/1000 kelime bütçesi, özet ve anahtar kelimeler, TXT olarak kaydetme. **Bu aşamada gerçek ONNX/GGUF üretimi yoktur.** Haricî LLM API'si, API anahtarı ve zorunlu hesap bulunmaz. Gerçek Windows cihaz ve ticari yayın kabulü **HOLD**.
+
+**Tek komutla geliştirme penceresi:** npm install sonrasında npm run desktop:start. Windows portable EXE aday paketi: npm run desktop:pack:win. Entegrasyon, kurulum ve güvenlik ayrıntıları için [İşlem 005 Windows Desktop P0](docs/ISLEM_005_WINDOWS_DESKTOP_P0.md).
+
+### Ana geliştirme planı
+
+**W-P0 Windows arayüzü → W-P1 yerel ONNX motoru → W-P2 gerçek offline Türkçe ve kaynak kanıtı → W-P3 PDF/DOCX → W-P4 imzalı Windows dağıtımı → E-OPTIONAL uzantı.**
+
+---
+
+## Önceki Chrome/Edge uzantısı mimarisi (korunan referans)
+
+Aşağıdaki özellik/plan açıklamaları önceki MV3 uzantısı için geçerlidir. Yeni Windows P0'ın kurulu veya kabul edilmiş özelliği gibi okunmamalıdır.
+
+### Tarihsel MV3 uzantı tanımı
 
 > **Proje türü:** Chrome / Microsoft Edge uzantısı · Manifest V3 · Yerel-öncelikli · Açık kaynak
 >

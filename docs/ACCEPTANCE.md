@@ -2,6 +2,23 @@
 
 Durum sözcükleri: `PASS` kanıtlı gerçek kabul; `PARTIAL` kapsam sınırlı; `HOLD` kanıt yok; `FAIL` testte ihlal.
 
+## Yeni ana ürün: Windows Masaüstü P0 (İşlem 005)
+
+**Öncelik değişti:** OkuLens önce Windows EXE/portable ZIP olarak geliştirilecektir. Aşağıdaki Chrome/Edge OPFS kabulleri korunmuş tarihsel uzantı doğrulama kayıtlarıdır; Windows P0 sürümünün bir önkoşulu değildir.
+
+- [x] Electron masaüstü kabuğu ve iki panelli Türkçe arayüz kodlandı.
+- [x] Ortak TF-IDF / TextRank motoruyla 10/100/1000 özet; TXT/MD açma ve TXT kaydetme kodlandı.
+- [x] Renderer sandbox + contextIsolation, kısıtlı IPC, uzak HTTP engeli ve kaynak beyaz listesi kodlandı.
+- [x] Portatif Windows x64 EXE/ZIP üretimi için Windows GitHub Actions iş akışı oluşturuldu.
+- [ ] Gerçek Windows Electron GUI duman testinin CI'da kanıtlanması (CI sonucuna göre).
+- [ ] Kullanıcı bilgisayarında Windows EXE açılışı, metin/dosya akışı ve ağsız çalışma fiziksel kabulü (HOLD).
+- [ ] Yerel Qwen ONNX/VRAM/streaming ve kaynak sadakati (sonraki W-P1/W-P2 aşamaları, HOLD).
+- [ ] Kurulum paketi imza, lisans/SBOM ve ticari yayın (HOLD).
+
+[İşlem 005 Windows Masaüstü ana belge](ISLEM_005_WINDOWS_DESKTOP_P0.md)
+
+## Önceki uzantı kabul kayıtları — ilk Windows sürümüne şart değildir
+
 ## Yerel kaynak kontrolleri
 
 - [x] `manifest.json` JSON sözdizimi geçerli.

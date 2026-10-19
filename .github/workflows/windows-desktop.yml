@@ -1,0 +1,58 @@
+name: OkuLens Windows masaüstü EXE paketleme
+on:
+  pull_request:
+    paths:
+      - "desktop/**"
+      - "shared/hybrid-nlp.mjs"
+      - "shared/summarize.mjs"
+      - "package.json"
+      - "tests/windows-desktop-p0.test.mjs"
+      - ".github/workflows/windows-desktop.yml"
+  push:
+    branches:
+      - "feature/windows-desktop-p0-electron"
+  workflow_dispatch:
+jobs:
+  windows-desktop:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - name: Kodu al
+        uses: actions/checkout@v4
+      - name: Node.js 22 kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Paket bagimliliklarini kur
+        run: npm install --no-audit --no-fund
+      - name: Sozdizimi ve yerel ozetleme testleri
+        run: |
+          npm run check
+          npm test
+      - name: Electron Windows GUI gercek ozetleme smoke testi
+        run: npm run desktop:smoke
+      - name: Windows x64 tasinabilir exe olustur
+        run: npm run desktop:pack:win
+      - name: EXE varligini denetle ve zip paketi hazirla
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem -Path "dist/desktop" -Filter "OkuLens.exe" -File -Recurse | Select-Object -First 1
+          if ($null -eq $exe -or $exe.Length -le 0) { throw "DESKTOP_EXE_MISSING" }
+          # Paket icindeki gercek exe, asar ve protokol dosyalarini okuyarak
+          # Windows renderer'da ayni metin ozetleme duman testini calistirir.
+          $p = Start-Process -FilePath $exe.FullName -ArgumentList "--desktop-smoke" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "PACKAGED_DESKTOP_GUI_SMOKE_FAIL: $($p.ExitCode)" }
+          Write-Output "PACKAGED_DESKTOP_GUI_SMOKE_PASS"
+          $folder = $exe.Directory.FullName
+          $zip = Join-Path (Resolve-Path "dist").Path "OkuLens-Windows-x64-portable.zip"
+          Compress-Archive -Path (Join-Path $folder "*") -DestinationPath $zip -CompressionLevel Optimal -Force
+          if (-not (Test-Path $zip)) { throw "PORTABLE_ZIP_MISSING" }
+          Write-Output "Windows executable packaged: $($exe.Name); bytes $($exe.Length)"
+          Write-Output "Not code signed or installed on user device; physical acceptance HOLD."
+      - name: Windows portable uygulama paketi
+        uses: actions/upload-artifact@v4
+        with:
+          name: OkuLens-Windows-x64-portable
+          path: dist/OkuLens-Windows-x64-portable.zip
+          retention-days: 7
+          if-no-files-found: error
