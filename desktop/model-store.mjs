@@ -99,7 +99,12 @@ export async function installDesktopModel(root,backend,{
      if(bytes>maxBytes(asset))throw new Error('MODEL_FILE_TOO_LARGE '+asset.path);
      const buf=Buffer.from(chunk);
      h.update(buf);
-     await handle.write(buf);
+     let offset=0;
+     while(offset<buf.byteLength){
+      const {bytesWritten}=await handle.write(buf,offset,buf.byteLength-offset);
+      if(!bytesWritten)throw new Error('MODEL_DISK_WRITE_INCOMPLETE');
+      offset+=bytesWritten;
+     }
      onProgress({stage:'downloading',path:asset.path,index:index+1,total:expected.length,bytes});
     }
    }finally{await handle.close();}
