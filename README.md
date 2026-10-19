@@ -1028,3 +1028,12 @@ Ayarlar ekranında artık sahipsiz OPFS model klasörlerini önce **kuru taramay
 [İşlem 004-D teknik sözleşmesi](docs/ISLEM_004D_OPFS_WORKER_PREFLIGHT.md) kapsamında ONNX dosyalarının tarayıcı OPFS deposundan okunabildiğini üretken model başlatmadan sınayan bir Worker ön test düzeneği eklendi. Kaynak URL'leri aynı uzantı kimliği, sabit model ID'si ve manifestteki beyaz liste ile sınırlandırılıyor; HTTP(S) ile uzaktan model getirme reddediliyor. Studio → Gerçek Model Kabul Laboratuvarı içinde **OPFS model dosyalarını Worker içinde ön denetle** komutu ve kullanıcı isteğiyle indirilebilen, gerçek üretimi onaylamayan JSON kayıt mevcut.
 
 **Sınır:** Ön test gerçek Chrome/Edge'de henüz çalıştırılmadı. Model ağırlıklarının Transformers.js tarafından gerçekten yüklenmesi, internet kapalı Türkçe üretim, streaming, RAM/VRAM ve bağımsız kaynak doğruluğu **HOLD**. Issue #4 ve ticari yayımlama kapatılamaz.
+
+
+---
+
+## İşlem 004-E — Windows kabul kanıt paketi
+
+[İşlem 004-E Windows kabul paketi](docs/ISLEM_004E_WINDOWS_KABUL_KANIT_PAKETI.md) içinde Chrome ve Edge için ayrı, kullanıcı bilgisayarında yürütülebilecek hazırlık ve kanıt kontrol komutları yer alır. **scripts/windows-kabul-hazirlik.ps1** tarayıcı/Windows/GPU sürümlerini ve commit kimliğini cihazda kaydeder; **scripts/windows-acceptance-audit.mjs** OPFS Worker ve gerçek model JSON'larını denetler. Her iki araç da gerçek ONNX çıktısı üretmez ve cihaz/ticari yayın **PASS** vermez.
+
+Yerel kanıtları **kanitlar/** klasöründe saklayın: Git bunu takip etmiyor. Gerçek e-posta, ham HAR, kişisel URL veya müşteri verisi GitHub'a konulmamalı. **Issue #4 açık/HOLD** kalır.
