@@ -3,7 +3,7 @@
 <head>
  <meta charset="utf-8">
  <meta name="viewport" content="width=device-width,initial-scale=1">
- <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+ <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
  <title>OkuLens · Windows</title>
  <link rel="stylesheet" href="./style.css">
 </head>
@@ -13,7 +13,7 @@
    <div class="logo"><div class="mark">O</div><div><strong>OkuLens</strong><span>Windows Masaüstü</span></div></div>
    <div class="nav">
     <div class="nav-active">Metin özetleme</div>
-    <div class="nav-pending">Yerel ONNX <span>sonraki aşama</span></div>
+    <div class="nav-active" style="margin-top:8px">Yerel ONNX <span style="display:block;font-size:10px">W-P1 · ön kabul</span></div>
     <div class="nav-pending">PDF / DOCX <span>planlandı</span></div>
    </div>
    <div class="sidebar-bottom"><span class="dot"></span> Çevrimdışı yerel motor
@@ -22,9 +22,9 @@
   </aside>
   <main class="main">
    <header>
-    <div><p class="eyebrow">MASAÜSTÜ · P0</p><h1>Metinlerini kendi bilgisayarında özetle.</h1>
+    <div><p class="eyebrow">MASAÜSTÜ · W-P1</p><h1>Metinlerini kendi bilgisayarında özetle.</h1>
      <p class="sub">Dosya aç, metin yapıştır ve kaynağından kopmadan özetini oluştur.</p></div>
-    <span class="chip">Yerel TF-IDF + TextRank</span>
+    <span class="chip">TF-IDF + isteğe bağlı yerel Qwen ONNX</span>
    </header>
    <div class="workarea">
     <section class="panel source">
@@ -37,6 +37,25 @@
      <input id="source-title" type="text" maxlength="300" placeholder="İsteğe bağlı başlık">
      <label for="source-text">İçerik</label>
      <textarea id="source-text" maxlength="260000" placeholder="Buraya Türkçe veya İngilizce bir metin yapıştırabilir ya da üstteki düğmeyle yerel bir dosya açabilirsin."></textarea>
+     <div class="model-settings">
+      <label for="engine-mode">Özetleme motoru</label>
+      <select id="engine-mode"><option value="extractive">Yerel TextRank (anında)</option>
+       <option value="onnx">Yerel Qwen/ONNX (kurulum gerekir)</option></select>
+      <label for="model-backend">Yapay zekâ yürütme</label>
+      <select id="model-backend"><option value="webgpu">WebGPU q4f16 (~648 MB)</option>
+       <option value="wasm">CPU/WASM q4 (~997 MB)</option></select>
+      <p id="model-status" role="status">Yerel Qwen modeli denetleniyor…</p>
+      <label class="consent"><input id="model-consent" type="checkbox">
+       Qwen (Apache-2.0) model dosyalarını yalnız bu cihaz için indirmeyi onaylıyorum.</label>
+      <div class="actions">
+       <button id="model-install" class="secondary" type="button">Modeli indir</button>
+       <button id="model-verify" class="secondary" type="button">SHA-256 doğrula</button>
+       <button id="model-remove" class="ghost" type="button">Modeli sil</button>
+       <button id="model-cancel" class="ghost" type="button" disabled>İptal</button>
+      </div>
+      <progress id="model-progress" max="10" value="0" style="width:100%"></progress>
+      <p id="model-detail" class="muted">Büyük model ilk kurulumda internet ister; özet içerikleri modele yerel olarak iletilir.</p>
+     </div>
      <div class="settings"><div><label for="length">Özet uzunluğu</label>
        <select id="length"><option value="10">10 kelime — kısa</option><option value="100" selected>100 kelime — standart</option><option value="1000">1000 kelime — uzun</option></select></div>
        <div class="hint">Kelime hedefi azami bütçedir; kaynak kısaysa içerik uydurulmaz.</div></div>
@@ -55,12 +74,12 @@
       <div class="result-footer"><button type="button" id="copy" class="secondary">Özeti kopyala</button>
        <button type="button" id="save" class="secondary">TXT olarak kaydet</button></div>
       <h3>Öne çıkan anahtar kelimeler</h3><div id="keywords" class="keywords"></div>
-      <p class="notice">Özet, kaynak cümlelerinden seçilerek oluşturulur. Üretken yeniden yazım veya doğrulanmış ONNX çıktısı değildir.</p>
+      <p id="result-note" class="notice">TextRank çıktıları çıkarımsaldır. ONNX çıktıları kaynak sadakati açısından bağımsız inceleme gerektirir.</p>
       <p id="warnings" class="warnings"></p>
      </div>
     </section>
    </div>
-   <footer><span id="status" role="status" aria-live="polite">Hazır. Veriler bu uygulamanın dışında otomatik gönderilmez.</span><span>P0 · Windows ön sürüm · yerel model kabulü bekleniyor</span></footer>
+   <footer><span id="status" role="status" aria-live="polite">Hazır. Veriler bu uygulamanın dışında otomatik gönderilmez.</span><span>W-P1 · Qwen/ONNX çalışma adayı · gerçek Windows kabulü bekleniyor</span></footer>
   </main>
  </div>
  <script type="module" src="./renderer.mjs"></script>
