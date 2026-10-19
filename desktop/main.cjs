@@ -15,6 +15,7 @@ const ASSETS=new Map([
  ['/desktop/index.html','text/html; charset=utf-8'],
  ['/desktop/style.css','text/css; charset=utf-8'],
  ['/desktop/renderer.mjs','text/javascript; charset=utf-8'],
+ ['/desktop/summary-core.mjs','text/javascript; charset=utf-8'],
  ['/shared/summarize.mjs','text/javascript; charset=utf-8'],
  ['/shared/hybrid-nlp.mjs','text/javascript; charset=utf-8']
 ]);
