@@ -8,6 +8,9 @@ on:
       - "package.json"
       - "tests/windows-desktop-p0.test.mjs"
       - "tests/windows-file-summary-fixes.test.mjs"
+      - "tests/numeric-summary-fidelity.test.mjs"
+      - "tests/local-summary-regression-cli.test.mjs"
+      - "scripts/yerel-ozet-regresyon.mjs"
       - ".github/workflows/windows-desktop.yml"
   push:
     branches:
@@ -25,7 +28,17 @@ jobs:
         with:
           node-version: "22"
       - name: Paket bagimliliklarini kur
-        run: npm install --no-audit --no-fund
+        shell: pwsh
+        run: |
+          # GitHub runner/npm kayıt bağlantısındaki geçici ECONNRESET kesintileri için
+          # TLS doğrulamasını kapatmadan en fazla üç sınırlı tekrar.
+          for ($attempt = 1; $attempt -le 3; $attempt++) {
+            npm.cmd install --no-audit --no-fund --fetch-retries=3 --fetch-retry-mintimeout=5000 --fetch-retry-maxtimeout=60000
+            if ($LASTEXITCODE -eq 0) { exit 0 }
+            Write-Warning "Npm kurulum denemesi $attempt basarisiz. Ag/TLS ayarlari degistirilmeyecek."
+            if ($attempt -lt 3) { Start-Sleep -Seconds (5 * $attempt) }
+          }
+          throw 'WINDOWS_NPM_DEPENDENCY_INSTALL_FAILED'
       - name: Sozdizimi ve yerel ozetleme testleri
         run: |
           npm run check

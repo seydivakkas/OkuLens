@@ -1,3 +1,16 @@
+## İşlem 008 — Sayısal bütünlük ve 10/100/1000 bilgi seçimi
+
+- [x] Binlik, ondalık, tarih ve para değerlerinin cümle ayırıcıdan kaybolmasını engelleyen kod ve testler yazıldı.
+- [x] 10 kelimede konu, 100/1000 kelimede bölge temsilini güçlendiren seçim sezgiselleri eklendi.
+- [x] Gerçek kullanıcı TXT'yi GitHub'a yüklemeden yerel üç özet ve numerik bütünlük raporu oluşturma aracı eklendi.
+- [ ] İlgili GitHub CI ve Windows EXE doğrulamasının tamamlanması (CI sonucuna bağlı).
+- [ ] Kullanıcının gerçek TXT'siyle yeni 10/100/1000 özetlerinin kaynak sadakati/kalite yeniden kabulü (HOLD).
+- [ ] Qwen gerçek ONNX, çevrimdışı Windows, RAM/VRAM ve ticari yayın (HOLD).
+
+[İşlem 008 teknik belge](ISLEM_008_SAYISAL_BUTUNLUK_VE_OZET_KALITESI.md)
+
+---
+
 
 
 ## Windows İşlem 007 — Gerçek kullanıcı TXT/MD düzeltmeleri
