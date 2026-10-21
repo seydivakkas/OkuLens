@@ -87,3 +87,13 @@ test('Windows dosya açma IPC eski 260k sınırını kaldırdı',async()=>{
  assert.match(renderer,/if\(opened\)await summarizeNow\(\{fileAuto:true\}\)/);
  assert.match(html,/id="model-settings"/);
 });
+
+test('Windows menusu Turkce ve dosya acma Ctrl+O kisayolu var',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const main=await readFile(new URL('../desktop/main.cjs',import.meta.url),'utf8');
+ assert.match(main,/installTurkishMenu\(/);
+ assert.match(main,/label:'Dosya'/);
+ assert.match(main,/label:'Düzen'/);
+ assert.match(main,/label:'Görünüm'/);
+ assert.match(main,/accelerator:'CmdOrCtrl\+O'/);
+});
