@@ -93,3 +93,11 @@ test('kaynak sayı uzunluğu ve özet kısaltma sırası korunur',()=>{
  assert.ok(result.actualWords<=10);
  for(const n of exactNums(result.text))assert.ok(exactNums(original).has(n));
 });
+
+test('Türkçe 1. Nisan biçimindeki gün-ay ifadeleri de bölünmez',()=>{
+ const source='Pilot 1. Nisan 2026 tarihinde başladı. İkinci kontrol 15. Ekim 2026 tarihinde yapıldı.';
+ const rows=splitSentences(source);
+ assert.equal(rows.length,2);
+ assert.equal(rows[0],'Pilot 1. Nisan 2026 tarihinde başladı.');
+ assert.equal(rows[1],'İkinci kontrol 15. Ekim 2026 tarihinde yapıldı.');
+});
