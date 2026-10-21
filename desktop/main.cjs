@@ -1,7 +1,7 @@
 /* OkuLens Windows masaüstü P0 — yalnızca paketli kaynaklar ve kullanıcı seçimi.
  * Node API'leri DOM'a sunulmaz; renderer sandbox ve contextIsolation etkindir.
  */
-const {app,BrowserWindow,dialog,ipcMain,protocol,session,net}=require('electron');
+const {app,BrowserWindow,dialog,ipcMain,protocol,session,net,Menu}=require('electron');
 const {pathToFileURL}=require('node:url');
 const fs=require('node:fs/promises');
 const path=require('node:path');
@@ -84,6 +84,33 @@ async function respondAsset(request){
    'X-Content-Type-Options':'nosniff','Cache-Control':'no-store'}});
  }catch{return new Response('Dosya okunamadi',{status:404});}
 }
+function installTurkishMenu(){
+ const menu=Menu.buildFromTemplate([
+  {label:'Dosya',submenu:[
+   {label:'Metin dosyası aç…',accelerator:'CmdOrCtrl+O',
+    click:()=>mainWindow?.webContents.executeJavaScript("document.getElementById('open').click()")},
+   {type:'separator'},
+   {label:'Çıkış',role:'quit'}
+  ]},
+  {label:'Düzen',submenu:[
+   {label:'Geri al',role:'undo'},
+   {label:'Yinele',role:'redo'},
+   {type:'separator'},
+   {label:'Kes',role:'cut'},
+   {label:'Kopyala',role:'copy'},
+   {label:'Yapıştır',role:'paste'},
+   {label:'Tümünü seç',role:'selectAll'}
+  ]},
+  {label:'Görünüm',submenu:[
+   {label:'Yakınlaştır',role:'zoomIn'},
+   {label:'Uzaklaştır',role:'zoomOut'},
+   {label:'Gerçek boyut',role:'resetZoom'},
+   {label:'Tam ekran',role:'togglefullscreen'}
+  ]}
+ ]);
+ Menu.setApplicationMenu(menu);
+}
+
 function createWindow(){
  mainWindow=new BrowserWindow({
   width:1280,height:840,minWidth:860,minHeight:570,
@@ -259,6 +286,7 @@ app.whenReady().then(async()=>{
  protocol.handle('okulens',respondAsset);
  registerIPC();
  registerModelIPC();
+ installTurkishMenu();
  createWindow();
 }).catch(error=>{console.error('DESKTOP_START_FAILED',error?.message);app.quit();});
 app.on('window-all-closed',()=>app.quit());
