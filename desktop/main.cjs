@@ -20,6 +20,8 @@ const ASSETS=new Map([
  ['/desktop/style.css','text/css; charset=utf-8'],
  ['/desktop/renderer.mjs','text/javascript; charset=utf-8'],
  ['/desktop/summary-core.mjs','text/javascript; charset=utf-8'],
+ ['/desktop/extractive-worker.mjs','text/javascript; charset=utf-8'],
+ ['/desktop/extractive-client.mjs','text/javascript; charset=utf-8'],
  ['/desktop/model-worker.mjs','text/javascript; charset=utf-8'],
  ['/desktop/onnx-client.mjs','text/javascript; charset=utf-8'],
  ['/shared/generative-plan.mjs','text/javascript; charset=utf-8'],
@@ -192,7 +194,10 @@ function registerIPC(){
   if(!stat.isFile()||stat.size>MAX_BYTES)throw new Error('DOSYA_BOYUTU_EN_FAZLA_2_MIB');
   const bytes=await fs.readFile(chosen);
   const body=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
-  if(body.length>260000)throw new Error('METIN_EN_FAZLA_260000_KARAKTER');
+  // 2 MiB UTF-8 dosya sınırı zaten doğrulandı; önceki 260.000 karakter
+  // engeli dosya açmayı gereksiz yere reddediyordu.
+  if(body.length>2*1024*1024)throw new Error('METIN_EN_FAZLA_2_MIB_KARAKTER');
+  if(!body.trim())throw new Error('BOS_DOSYA');
   return {canceled:false,name:path.basename(chosen),text:body};
  });
  ipcMain.handle('desktop:save-summary',async(event,text)=>{
