@@ -25,7 +25,8 @@ test('metin çok kısa ise kaynak uydurmadan aynen korunur',()=>{
 test('iki kelimelik kaynak hibrit seçici boş verse bile saklanır',()=>{
  const result=createDesktopSummary('Merhaba dünya.',{targetWords:10});
  assert.equal(result.text,'Merhaba dünya.');
- assert.equal(result.engine,'extractive');
+ assert.ok(['extractive','hybrid-extractive'].includes(result.engine));
+ assert.equal(result.actualWords,2);
 });
 test('boş kaynak kabul edilmez',()=>{
  assert.throws(()=>createDesktopSummary('  '),/DESKTOP_EMPTY_SOURCE/);

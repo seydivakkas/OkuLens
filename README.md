@@ -1061,3 +1061,10 @@ Ayarlar ekranında artık sahipsiz OPFS model klasörlerini önce **kuru taramay
 [İşlem 004-E Windows kabul paketi](docs/ISLEM_004E_WINDOWS_KABUL_KANIT_PAKETI.md) içinde Chrome ve Edge için ayrı, kullanıcı bilgisayarında yürütülebilecek hazırlık ve kanıt kontrol komutları yer alır. **scripts/windows-kabul-hazirlik.ps1** tarayıcı/Windows/GPU sürümlerini ve commit kimliğini cihazda kaydeder; **scripts/windows-acceptance-audit.mjs** OPFS Worker ve gerçek model JSON'larını denetler. Her iki araç da gerçek ONNX çıktısı üretmez ve cihaz/ticari yayın **PASS** vermez.
 
 Yerel kanıtları **kanitlar/** klasöründe saklayın: Git bunu takip etmiyor. Gerçek e-posta, ham HAR, kişisel URL veya müşteri verisi GitHub'a konulmamalı. **Issue #4 açık/HOLD** kalır.
+
+
+## Windows Dosya Akışı — İşlem 007
+
+**TXT/MD dosyasını seç → dosya otomatik okunur → TextRank özeti hazırlanır.** Kopyala-yapıştır veya ikinci bir özetleme düğmesi gerekmez. 2 MiB altındaki uzun UTF-8 kaynaklar bölüm bölüm incelenir; eski 260.000 karakter engeli kaldırıldı. 100 kelimelik bütçeye sığan kısa metinler sebepsiz daraltılmaz; uzun kaynakta belge bölgesi temsili ve MMR tekrar azaltma iyileştirildi. Ana buton yukarı taşındı, Qwen kurulumu isteğe bağlı açılır bölüme alındı. Özet hâlâ çıkarımsaldır, üretken gerçek ONNX değildir.
+
+[İşlem 007](docs/ISLEM_007_WINDOWS_DOSYA_OZET_UX.md) · Gerçek Windows kullanıcısı ve Qwen kabulü HOLD.

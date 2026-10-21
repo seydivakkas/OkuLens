@@ -30,17 +30,24 @@
     <section class="panel source">
      <div class="panel-heading"><div><span class="step">01</span><h2>Kaynak metin</h2></div><span id="source-count" class="muted">0 kelime</span></div>
      <div class="actions">
-      <button id="open" type="button" class="secondary">Metin dosyası aç (.txt / .md)</button>
+      <button id="open" type="button" class="secondary">Dosya seç ve hemen özetle (.txt / .md)</button>
       <button id="clear" type="button" class="ghost">Temizle</button>
      </div>
+     <p id="source-file-info" class="source-file-info" role="status">Dosya seçebilir veya aşağıya metin yapıştırabilirsin.</p>
      <label for="source-title">Belge başlığı</label>
      <input id="source-title" type="text" maxlength="300" placeholder="İsteğe bağlı başlık">
      <label for="source-text">İçerik</label>
-     <textarea id="source-text" maxlength="260000" placeholder="Buraya Türkçe veya İngilizce bir metin yapıştırabilir ya da üstteki düğmeyle yerel bir dosya açabilirsin."></textarea>
-     <div class="model-settings">
-      <label for="engine-mode">Özetleme motoru</label>
-      <select id="engine-mode"><option value="extractive">Yerel TextRank (anında)</option>
-       <option value="onnx">Yerel Qwen/ONNX (kurulum gerekir)</option></select>
+     <textarea id="source-text" maxlength="2097152" placeholder="Buraya Türkçe veya İngilizce bir metin yapıştırabilir ya da üstteki düğmeyle yerel bir dosya açabilirsin."></textarea>
+     <div class="settings desktop-summary-options">
+      <div>      <label for="engine-mode">Özetleme motoru</label>
+      <select id="engine-mode"><option value="extractive">TextRank (hemen, çevrimdışı)</option>
+       <option value="onnx">Qwen/ONNX (model kurulumu gerekir)</option></select></div>
+      <div><label for="length">Özet uzunluğu</label>
+       <select id="length"><option value="10">10 kelime — kısa</option><option value="100" selected>100 kelime — standart</option><option value="1000">1000 kelime — uzun</option></select></div>
+       <div class="hint">Kaynak kısa ise metin uydurulmaz. Qwen modelinin ayrıca kurulması gerekir.</div></div>
+     <button id="summarize" class="primary" type="button">Yerel özeti oluştur <span aria-hidden="true">→</span></button>
+     <details id="model-settings" class="model-settings">
+      <summary>İsteğe bağlı Qwen/ONNX model ayarları ve indirme</summary>
       <label for="model-backend">Yapay zekâ yürütme</label>
       <select id="model-backend"><option value="webgpu">WebGPU q4f16 (~648 MB)</option>
        <option value="wasm">CPU/WASM q4 (~997 MB)</option></select>
@@ -55,16 +62,13 @@
       </div>
       <progress id="model-progress" max="10" value="0" style="width:100%"></progress>
       <p id="model-detail" class="muted">Büyük model ilk kurulumda internet ister; özet içerikleri modele yerel olarak iletilir.</p>
-     </div>
-     <div class="settings"><div><label for="length">Özet uzunluğu</label>
-       <select id="length"><option value="10">10 kelime — kısa</option><option value="100" selected>100 kelime — standart</option><option value="1000">1000 kelime — uzun</option></select></div>
-       <div class="hint">Kelime hedefi azami bütçedir; kaynak kısaysa içerik uydurulmaz.</div></div>
-     <button id="summarize" class="primary" type="button">Yerel özeti oluştur <span aria-hidden="true">→</span></button>
+     </details>
+
     </section>
     <section class="panel result">
      <div class="panel-heading"><div><span class="step">02</span><h2>Özet</h2></div><span id="engine" class="muted">Henüz oluşturulmadı</span></div>
      <div id="empty" class="empty"><div class="empty-icon">✦</div>
-       <strong>Özet burada görünecek</strong><p>Metnini ekleyip “Yerel özeti oluştur” düğmesine bas.</p>
+       <strong>Özet burada görünecek</strong><p>Metin yaz veya TXT/MD dosyası seç. Dosya seçersen özet otomatik hazırlanır.</p>
      </div>
      <div id="result-content" hidden>
       <div class="metrics"><div><strong id="result-words">—</strong><small>Özet kelimesi</small></div>

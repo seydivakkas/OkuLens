@@ -7,6 +7,7 @@ on:
       - "shared/summarize.mjs"
       - "package.json"
       - "tests/windows-desktop-p0.test.mjs"
+      - "tests/windows-file-summary-fixes.test.mjs"
       - ".github/workflows/windows-desktop.yml"
   push:
     branches:
@@ -33,6 +34,8 @@ jobs:
         run: npm run build:runtime
       - name: Electron Windows GUI gercek ozetleme smoke testi
         run: npm run desktop:smoke
+      - name: Gercek Windows GUI dosya secimi ve otomatik ozet smoke testi
+        run: npm run desktop:file-smoke
       - name: Windows x64 tasinabilir exe olustur
         run: npm run desktop:pack:win
       - name: EXE varligini denetle ve zip paketi hazirla
