@@ -32,3 +32,17 @@ footer{display:flex;justify-content:space-between;align-items:center;gap:14px;co
 .model-settings #model-status{font-size:11px;color:#476c95;margin:3px 0;line-height:1.5}
 .model-settings button{flex:1;min-width:105px}
 .model-settings progress{accent-color:#3473b6}
+
+/* Windows W-P2: ana dosya→özet akışı ilk ekranda kalsın; model kurulumu isteğe bağlı. */
+.source-file-info{padding:9px 12px;margin:-5px 0 13px;background:#f0f6ff;border:1px solid #dfebfa;border-radius:8px;color:#426a96;font-size:11px;line-height:1.55;overflow-wrap:anywhere}
+.source textarea{flex:none;height:205px;min-height:160px;max-height:325px}
+.desktop-summary-options{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:12px;align-items:start;margin-top:14px}
+.desktop-summary-options>div{display:flex;flex-direction:column;min-width:0}
+.desktop-summary-options select{min-width:0;width:100%;font-size:12px}
+.desktop-summary-options .hint{grid-column:1/-1;max-width:none}
+.model-settings{display:block;margin-top:12px;margin-bottom:0;padding:12px;background:#f2f6fc}
+.model-settings[open]{display:grid;gap:8px}
+.model-settings:not([open])>:not(summary){display:none!important}
+.model-settings>summary{cursor:pointer;color:#37628c;font-size:12px;font-weight:700;padding:4px;line-height:1.6}
+.model-settings>summary:focus-visible{outline:3px solid #7bb6fc}
+@media(max-width:1050px){.desktop-summary-options{grid-template-columns:1fr}}
