@@ -1068,3 +1068,8 @@ Yerel kanıtları **kanitlar/** klasöründe saklayın: Git bunu takip etmiyor. 
 **TXT/MD dosyasını seç → dosya otomatik okunur → TextRank özeti hazırlanır.** Kopyala-yapıştır veya ikinci bir özetleme düğmesi gerekmez. 2 MiB altındaki uzun UTF-8 kaynaklar bölüm bölüm incelenir; eski 260.000 karakter engeli kaldırıldı. 100 kelimelik bütçeye sığan kısa metinler sebepsiz daraltılmaz; uzun kaynakta belge bölgesi temsili ve MMR tekrar azaltma iyileştirildi. Ana buton yukarı taşındı, Qwen kurulumu isteğe bağlı açılır bölüme alındı. Özet hâlâ çıkarımsaldır, üretken gerçek ONNX değildir.
 
 [İşlem 007](docs/ISLEM_007_WINDOWS_DOSYA_OZET_UX.md) · Gerçek Windows kullanıcısı ve Qwen kabulü HOLD.
+
+
+## İşlem 008 — Özetleme sayısal sadakat ve konu odaklı seçim
+
+Binlik/ondalık noktalı sayılar, tarih ve parasal ifadelerin cümle bölme sırasında kaybı düzeltildi. 10 kelimelik özet ana konu terimlerini gözeterek, 100/1000 özetleri de bölüm çeşitliliği ve tekrar azaltma ile seçilir. Bunlar **TextRank/TF-IDF** iyileştirmesidir; yanlış kaynak iddiasını otomatik düzeltmez. [İşlem 008](docs/ISLEM_008_SAYISAL_BUTUNLUK_VE_OZET_KALITESI.md) ve yerel `npm run summary:regression -- --input <TXT>` tekrar deneyi.
