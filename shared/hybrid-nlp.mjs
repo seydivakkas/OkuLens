@@ -104,6 +104,18 @@ export function analyzeText(input,{title='',targetWords=100}={}) {
     return row.combined + .12*Math.min(5,lead)+.20*globals+.28*early+
       .12*numeric-.43*anaphora-.30*meta;
   };
+  // Ana konu çıpası: girişteki ilk gerçek içerikli, açıklayıcı cümle.
+  // Preambül/metaveri notları belgenin asıl konusunu bastırmamalı.
+  const subjectRow=rows.slice(0,Math.min(rows.length,20)).find(r=>
+    wordCount(r.text)>=14 &&
+    !/^(?:Bu dosya|Gerçek bir kurum|Amaç, OkuLens|Sürüm:|ÖNEMLİ NOT)/iu.test(r.text)
+  )||rows[0];
+  const subjectTerms=subjectRow?terms(subjectRow):new Set();
+  const shortSalience=row=>{
+    let subjectMatch=0;
+    for(const term of terms(row))if(subjectTerms.has(term))subjectMatch++;
+    return salience(row)+.34*Math.min(6,subjectMatch);
+  };
   const ranked=[...rows].sort((a,b)=>salience(b)-salience(a)||a.index-b.index);
   let remaining=budget,selected=[];
   const picked=new Set();
@@ -121,7 +133,8 @@ export function analyzeText(input,{title='',targetWords=100}={}) {
     if(budget<100){
       // 10 sözcüklük özet ayrı değerlendirilir; bağımsız ve ana
       // konuya yakın, bütçeye sığan en anlamlı cümleyi seç.
-      const short=ranked.filter(r=>wordCount(r.text)<=remaining);
+      const short=ranked.filter(r=>wordCount(r.text)<=remaining)
+        .sort((a,b)=>shortSalience(b)-shortSalience(a)||a.index-b.index);
       if(short.length) add(short[0]);
     }else{
       const bandCount=budget>=500?Math.min(8,Math.ceil(rows.length/12)):3;
