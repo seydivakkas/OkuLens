@@ -64,14 +64,65 @@ export function analyzeText(input,{title='',targetWords=100}={}) {
   const keywords=[...termFreq.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'tr')).slice(0,9).map(([word,frequency])=>({word,frequency}));
   const ranked=[...rows].sort((a,b)=>b.combined-a.combined||a.index-b.index);
   const budget=Math.max(1,Number(targetWords)||100);
+  const sourceWords=wordCount(clean);
   let remaining=budget,selected=[];
-  // Uzun raporlarda bölümlerin tamamını temsilen en yüksek puanlı cümleler.
-  if(budget>=500){for(const chunk of chunks){const best=[...chunk].sort((a,b)=>b.combined-a.combined)[0];if(best&&wordCount(best.text)<=remaining){selected.push(best);remaining-=wordCount(best.text);}}}
-  for(const row of ranked){if(selected.includes(row))continue;const n=wordCount(row.text);if(n<=remaining){selected.push(row);remaining-=n;}}
+  const picked=new Set();
+  // Kısa bir kaynak, özet bütçesine zaten sığıyorsa tüm kaynak korunur.
+  // Böylece 18 kelimelik dosyadan sebepsiz yere tek cümle seçilmez.
+  if(sourceWords<=budget){
+   selected=rows;
+   remaining=budget-sourceWords;
+  }else{
+   const add=row=>{
+    if(!row||picked.has(row.index))return false;
+    const n=wordCount(row.text);
+    if(n>remaining)return false;
+    picked.add(row.index);selected.push(row);remaining-=n;return true;
+   };
+   // En az 100 kelimelik bütçede giriş/orta/son bilgilerini aynı bölümden
+   // tekrar tekrar seçmek yerine metnin değişik bölgelerinden temsil al.
+   if(budget>=100&&rows.length>=6){
+    for(let band=0;band<3;band++){
+     const lower=Math.floor(rows.length*band/3);
+     const upper=Math.floor(rows.length*(band+1)/3);
+     const candidates=rows.slice(lower,upper)
+      .sort((a,b)=>b.combined-a.combined||a.index-b.index);
+     for(const row of candidates){if(add(row))break;}
+    }
+   }
+   // MMR: neredeyse aynı terimleri taşıyan cümleleri tekrar seçmek yerine
+   // farklı bilgileri kapsayan adaylara öncelik ver.
+   const pool=ranked.slice(0,Math.min(ranked.length,Math.max(450,budget*2)));
+   const uniqueTerms=row=>new Set(row.tokens);
+   const tokenCache=new Map();
+   const terms=row=>{
+    if(!tokenCache.has(row.index))tokenCache.set(row.index,uniqueTerms(row));
+    return tokenCache.get(row.index);
+   };
+   const overlap=(a,b)=>{
+    const aa=terms(a),bb=terms(b);
+    if(!aa.size||!bb.size)return 0;
+    let shared=0;
+    for(const term of aa)if(bb.has(term))shared++;
+    return shared/(aa.size+bb.size-shared);
+   };
+   while(remaining>0){
+    let best=null,score=-Infinity;
+    for(const row of pool){
+     if(picked.has(row.index)||wordCount(row.text)>remaining)continue;
+     const redundancy=selected.length?Math.max(...selected.map(s=>overlap(row,s))):0;
+     const zone=rows.length?Math.floor(3*row.index/rows.length):0;
+     const sameZone=selected.filter(x=>Math.floor(3*x.index/rows.length)===zone).length;
+     const adjusted=row.combined-0.45*redundancy-0.025*sameZone;
+     if(adjusted>score){best=row;score=adjusted;}
+    }
+    if(!add(best))break;
+   }
+  }
   selected.sort((a,b)=>a.index-b.index);
-  let summary=selected.map(s=>s.text).join(' ');
+  let summary=sourceWords<=budget?clean:selected.map(s=>s.text).join(' ');
   if(!summary && ranked.length)summary=wordTokens(ranked[0].text).slice(0,budget).join(' ')+'…';
-  const sourceWords=wordCount(clean),actualWords=wordCount(summary);
+  const actualWords=wordCount(summary);
   return {
     text:summary,actualWords,sourceWords,engine:'hybrid-extractive',createdAt:new Date().toISOString(),
     keywords,sections:chunks.length,scoredSentences:rows.length,
