@@ -8,6 +8,7 @@ on:
       - "package.json"
       - "tests/windows-desktop-p0.test.mjs"
       - "tests/windows-file-summary-fixes.test.mjs"
+      - "tests/numeric-summary-fidelity.test.mjs"
       - ".github/workflows/windows-desktop.yml"
   push:
     branches:
