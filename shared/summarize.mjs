@@ -27,7 +27,10 @@ export function splitSentences(text) {
     if (delimiter[0] !== '\n') {
       const before = clean.slice(start,end).trim();
       // Bölüm başlıklarındaki '1. GİRİŞ' numarası cümle bitişi değildir.
-      if (/^\d{1,3}\.$/u.test(before) || (delimiter==='.' && abbreviation.test(before))) continue;
+      const numericDate=delimiter==='.' && /\b\d{1,2}\.$/u.test(before) &&
+        /^\s*(?:Ocak|Şubat|Mart|Nisan|Mayıs|Haziran|Temmuz|Ağustos|Eylül|Ekim|Kasım|Aralık)\b/iu.test(clean.slice(end));
+      if (/^\d{1,3}\.$/u.test(before) || numericDate ||
+          (delimiter==='.' && abbreviation.test(before))) continue;
     }
     const sentence = clean.slice(start,end).trim();
     if (sentence) sentences.push(sentence);
