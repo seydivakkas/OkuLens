@@ -112,12 +112,17 @@ function createWindow(){
     if(typeof store.desktopModelStatus!=='function')throw new Error('DESKTOP_MODEL_STORE_UNAVAILABLE');
     console.log('DESKTOP_ONNX_RUNTIME_ASSETS_PRESENT (not inference proof)');
     const result=await mainWindow.webContents.executeJavaScript(
-     "(() => {const input=document.getElementById('source-text');" +
+     "(() => new Promise((resolve,reject) => {" +
+     "const input=document.getElementById('source-text');" +
      "input.value=Array.from({length:20},(_,i)=>'Bölüm '+i+' yerel metin özetleme işlemi internet gerektirmez. Kaynak cümleleri denetlenebilir.').join(' ');" +
      "document.getElementById('summarize').click();" +
-     "return {text:document.getElementById('result-text').textContent," +
-     "engine:document.getElementById('engine').textContent," +
-     "count:document.getElementById('result-words').textContent};})()"
+     "const deadline=Date.now()+15000;" +
+     "const poll=()=>{const text=document.getElementById('result-text').textContent;" +
+     "const engine=document.getElementById('engine').textContent;" +
+     "const count=document.getElementById('result-words').textContent;" +
+     "if(text&&/Yerel çıkarımsal/.test(engine))resolve({text,engine,count});" +
+     "else if(Date.now()>deadline)reject(new Error('GUI_SUMMARY_WORKER_TIMEOUT'));" +
+     "else setTimeout(poll,40);};poll();}))()"
     );
     if(!result.text||!/Yerel çıkarımsal/.test(result.engine)||
        !Number.isInteger(Number(result.count))||Number(result.count)<1)
