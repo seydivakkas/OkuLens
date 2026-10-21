@@ -1,3 +1,17 @@
+
+
+## Windows İşlem 007 — Gerçek kullanıcı TXT/MD düzeltmeleri
+
+- [x] 18 kelimelik kaynak 100 kelime bütçesinde gereksiz daraltılmıyor (kod)
+- [x] 2 MiB dosya limiti ve 260k üzerinde tam bölüm analizi (kod)
+- [x] Dosya seçimi otomatik TextRank Worker özetine bağlandı (kod)
+- [x] Ana özet butonu / Qwen ayarı arayüz önceliği düzenlendi (kod)
+- [ ] Node, Windows gerçek Electron IPC otomatik dosya GUI smoke testleri (CI sonucuna bağlı)
+- [ ] Kullanıcının Windows ortamında TXT/MD ve özet kalitesi fiziksel kabulü (HOLD)
+- [ ] Gerçek Qwen ONNX, çevrimdışı 10/100/1000 ve kaynak sadakati (HOLD)
+
+[İşlem 007](ISLEM_007_WINDOWS_DOSYA_OZET_UX.md)
+
 # OkuLens — Kabul Matrisi
 
 Durum sözcükleri: `PASS` kanıtlı gerçek kabul; `PARTIAL` kapsam sınırlı; `HOLD` kanıt yok; `FAIL` testte ihlal.
