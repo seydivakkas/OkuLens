@@ -56,7 +56,7 @@ export function analyzeText(input,{title='',targetWords=100}={}) {
   const start=performance.now();
   const clean=normalizeText(input).slice(0,260000);
   const sentences=splitSentences(clean)
-    .filter(s=>wordCount(s)>=3 && !/^(?:\\d{1,2}\\.\\s*)?[\\p{Lu}\\d\\s/—–-]{9,}$/u.test(s.trim()))
+    .filter(s=>wordCount(s)>=3 && !/^(?:\d{1,2}\.\s*)?[\p{Lu}\d\s/—–-]{9,}$/u.test(s.trim()))
     .map((text,index)=>({index,text,tokens:tokens(text)}));
   const chunks=makeChunks(sentences);
   const rows=[];
