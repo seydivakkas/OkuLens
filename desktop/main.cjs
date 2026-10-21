@@ -31,6 +31,8 @@ const ASSETS=new Map([
 ]);
 const MAX_BYTES=2*1024*1024;
 let mainWindow=null;
+let smokeFixtureFile=null;
+let smokeFixtureDir=null;
 function validateSender(event){
  if(!mainWindow||event.sender!==mainWindow.webContents||
     event.senderFrame!==mainWindow.webContents.mainFrame){
@@ -95,12 +97,13 @@ function createWindow(){
   }
  });
  const smoke=process.argv.includes('--desktop-smoke');
- if(!smoke)mainWindow.once('ready-to-show',()=>mainWindow.show());
- if(smoke){
+ const fileSmoke=process.argv.includes('--desktop-file-smoke');
+ if(!smoke&&!fileSmoke)mainWindow.once('ready-to-show',()=>mainWindow.show());
+ if(smoke||fileSmoke){
   const timer=setTimeout(()=>{
    console.error('DESKTOP_GUI_SMOKE_TIMEOUT');
    process.exitCode=1;app.quit();
-  },25000);
+  },fileSmoke?60000:25000);
   mainWindow.webContents.once('did-finish-load',async()=>{
    try{
     // Gerçek model indirmeden, paket içi Transformers.js JS ve ORT WASM
@@ -111,7 +114,19 @@ function createWindow(){
     const store=await modelOps();
     if(typeof store.desktopModelStatus!=='function')throw new Error('DESKTOP_MODEL_STORE_UNAVAILABLE');
     console.log('DESKTOP_ONNX_RUNTIME_ASSETS_PRESENT (not inference proof)');
-    const result=await mainWindow.webContents.executeJavaScript(
+    const result=fileSmoke?await mainWindow.webContents.executeJavaScript(
+     "(() => new Promise((resolve,reject)=>{" +
+     "document.getElementById('open').click();" +
+     "const deadline=Date.now()+45000;" +
+     "const poll=()=>{const text=document.getElementById('result-text').textContent;" +
+     "const engine=document.getElementById('engine').textContent;" +
+     "const info=document.getElementById('source-file-info').textContent;" +
+     "const chars=document.getElementById('source-text').value.length;" +
+     "if(text&&info.includes('otomatik özet hazır'))resolve({text,engine,count:document.getElementById('result-words').textContent,chars});" +
+     "else if(Date.now()>deadline)reject(new Error('FILE_AUTOSUMMARY_WORKER_TIMEOUT'));" +
+     "else setTimeout(poll,60);};poll();}))()"
+    ):await (async()=>{
+     return await mainWindow.webContents.executeJavaScript(
      "(() => new Promise((resolve,reject) => {" +
      "const input=document.getElementById('source-text');" +
      "input.value=Array.from({length:20},(_,i)=>'Bölüm '+i+' yerel metin özetleme işlemi internet gerektirmez. Kaynak cümleleri denetlenebilir.').join(' ');" +
@@ -124,15 +139,22 @@ function createWindow(){
      "else if(Date.now()>deadline)reject(new Error('GUI_SUMMARY_WORKER_TIMEOUT'));" +
      "else setTimeout(poll,40);};poll();}))()"
     );
+    })();
     if(!result.text||!/Yerel çıkarımsal/.test(result.engine)||
        !Number.isInteger(Number(result.count))||Number(result.count)<1)
       throw new Error('DESKTOP_GUI_SMOKE_INVALID_SUMMARY');
-    console.log('DESKTOP_GUI_SMOKE_PASS: arayuz gercek Chromium penceresinde yerel ozet olusturdu.');
+    if(fileSmoke&&result.chars<=260000)throw new Error('FILE_SMOKE_LARGE_TEXT_NOT_LOADED');
+    console.log(fileSmoke?'DESKTOP_FILE_AUTOSUMMARY_SMOKE_PASS: uzun TXT IPC + Worker + otomatik ozet.':
+     'DESKTOP_GUI_SMOKE_PASS: arayuz gercek Chromium penceresinde yerel ozet olusturdu.');
     process.exitCode=0;
    }catch(error){
     console.error('DESKTOP_GUI_SMOKE_FAIL',error?.message);
     process.exitCode=1;
-   }finally{clearTimeout(timer);app.quit();}
+   }finally{
+    clearTimeout(timer);
+    if(smokeFixtureDir)await fs.rm(smokeFixtureDir,{recursive:true,force:true}).catch(()=>{});
+    app.quit();
+   }
   });
  }
  mainWindow.webContents.setWindowOpenHandler(()=>({action:'deny'}));
@@ -187,7 +209,7 @@ function registerModelIPC(){
 function registerIPC(){
  ipcMain.handle('desktop:open-text',async(event)=>{
   validateSender(event);
-  const choice=await dialog.showOpenDialog(mainWindow,{
+  const choice=smokeFixtureFile?{canceled:false,filePaths:[smokeFixtureFile]}:await dialog.showOpenDialog(mainWindow,{
    title:'OkuLens — Yerel metin dosyası seç',
    properties:['openFile'],
    filters:[{name:'Metin ve Markdown',extensions:['txt','md']}]
@@ -220,6 +242,15 @@ function registerIPC(){
  });
 }
 app.whenReady().then(async()=>{
+ if(process.argv.includes('--desktop-file-smoke')){
+  // Test yalnız CI ortamında seçici yerine yerel sentetik dosya döndürür.
+  // Kullanıcı belgelerine erişmez ve gerçek Windows manuel dosya kabulü değildir.
+  smokeFixtureDir=await fs.mkdtemp(path.join(app.getPath('temp'),'okulens-autofile-smoke-'));
+  smokeFixtureFile=path.join(smokeFixtureDir,'uzun-ornek.txt');
+  const rows=Array.from({length:5300},(_,i)=>
+   'Bolum '+i+' yerel belge ozetleme sisteminde kaynak sadakati ve cevrimdisi islem korunur.\n');
+  await fs.writeFile(smokeFixtureFile,rows.join(''),'utf8');
+ }
  // Kullanıcı onayı olmadan model, bulut API veya sayfa isteği yapılmaz.
  session.defaultSession.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));
  session.defaultSession.webRequest.onBeforeRequest(
