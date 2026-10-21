@@ -21,6 +21,6 @@ test('yerel rapor 10/100/1000 çıktıları üretir ve engine/model iddiası uyd
 });
 test('yerel raporda noktalı sayı parçaları yeni sonuç olarak görünmez',()=>{
  const outputs=evaluateSummarySet(doc);
- assert.ok(outputs.every(x=>!/\b000 Türk lirası/.test(x.output)));
+ assert.ok(outputs.every(x=>!/(?:^|\s)000 Türk lirası/.test(x.output)));
  assert.equal(outputs[2].output,doc);
 });
