@@ -18,21 +18,21 @@ export function splitSentences(text) {
   const clean = normalizeText(text);
   if (!clean) return [];
   const sentences = [];
-  const abbreviation = /(?:^|\\s)(?:Dr|Prof|Doç|Av|Sn|Md|No|vb|vs|örn|bkz|T\\.C|A\\.Ş)\\.$/iu;
+  const abbreviation = /(?:^|\s)(?:Dr|Prof|Doç|Av|Sn|Md|No|vb|vs|örn|bkz|T\.C|A\.Ş)\.$/iu;
   let start = 0;
-  const delimiters = /[.!?]+(?=\\s|$)|\\n+/gu;
+  const delimiters = /[.!?]+(?=\s|$)|\n+/gu;
   for (const match of clean.matchAll(delimiters)) {
     const delimiter = match[0];
     const end = match.index + delimiter.length;
-    if (delimiter[0] !== '\\n') {
+    if (delimiter[0] !== '\n') {
       const before = clean.slice(start,end).trim();
       // Bölüm başlıklarındaki '1. GİRİŞ' numarası cümle bitişi değildir.
-      if (/^\\d{1,3}\\.$/u.test(before) || (delimiter==='.' && abbreviation.test(before))) continue;
+      if (/^\d{1,3}\.$/u.test(before) || (delimiter==='.' && abbreviation.test(before))) continue;
     }
     const sentence = clean.slice(start,end).trim();
     if (sentence) sentences.push(sentence);
     start = end;
-    while(start<clean.length && /\\s/u.test(clean[start]))start++;
+    while(start<clean.length && /\s/u.test(clean[start]))start++;
   }
   const tail = clean.slice(start).trim();
   if (tail) sentences.push(tail);
