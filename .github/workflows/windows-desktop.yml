@@ -9,6 +9,8 @@ on:
       - "tests/windows-desktop-p0.test.mjs"
       - "tests/windows-file-summary-fixes.test.mjs"
       - "tests/numeric-summary-fidelity.test.mjs"
+      - "tests/local-summary-regression-cli.test.mjs"
+      - "scripts/yerel-ozet-regresyon.mjs"
       - ".github/workflows/windows-desktop.yml"
   push:
     branches:
