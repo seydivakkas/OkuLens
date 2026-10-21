@@ -22,3 +22,15 @@
 - Windows Qwen/ONNX gerçek model inference, çevrimdışı kabul, VRAM ve ticari yayın HOLD; Issue #19 açık tutulur.
 
 **Karar (CI öncesi):** SAYISAL_BUTUNLUK_KOD_ADAYI / OZET_KALITESI_SENTETIK_CI_BEKLENIYOR / WINDOWS_KULLANICI_YENIDEN_KABUL_HOLD / QWEN_ONNX_HOLD / TICARI_YAYIN_HOLD.
+
+## Aynı TXT dosyasıyla tekrar üretilebilir 10/100/1000 deneyi
+
+Kullanıcı kendi Windows bilgisayarında önceki kurgusal kaynak TXT'yi yerel klasörde tutar. Dosya internete yüklenmez. Tek PowerShell oturumunda, proje klasöründe:
+
+~~~powershell
+npm.cmd run summary:regression -- --input "C:\KENDI_DOSYA_YOLUN\OkuLens_Ozet_Kalite_Testi_Kurgusal_Rapor.txt"
+~~~
+
+Rapor `kanitlar/islem008` klasöründe `OkuLens-10-Ozet.txt`, `OkuLens-100-Ozet.txt`, `OkuLens-1000-Ozet.txt` ve `denetim.json` üretir. `kanitlar/` gitignore kapsamındadır. JSON, belge gövdesini içermez; hash, süre, seçilen sayısal değerler ve kelime bütçesi uygunluğunu kaydeder.
+
+**Denetim sınırı:** Numerik belirteçlerin kaynaktan bulunması sayısal bağlamın doğru aktarıldığını veya özetin kaliteli olduğunu garanti etmez. Bütün çıktılar `qualityDecision=HOLD` ile başlar. Önceki üç gerçek çıktı dosyası GitHub'a eklenmez; karşılaştırma kullanıcı tarafından yapılır.
