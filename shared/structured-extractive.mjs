@@ -103,8 +103,8 @@ function candidatesFor(parsed,title){
      meta*1.4-anaphora*.25;
    if(item.category==='fidelity'&&/(?:geçti|başarı|sorun bulundu|temel bilgi denetiminden)/iu.test(sentence))
      item.score+=1.05;
-   if(item.category==='decision'&&/(?:onay|izin vermedi|yeterli kanıt|otomatik karar verilmemesi)/iu.test(sentence))
-     item.score+=.9;
+   if(item.category==='decision')
+     item.score+=/(?:onay|izin vermedi|yeterli kanıt|karar verilmemesi|yaygınlaştırmaya izin)/iu.test(sentence)?2.0:-1.15;
    item.score+=Math.max(0,.22-candidates.length*.008);
    candidates.push(item);
   }
