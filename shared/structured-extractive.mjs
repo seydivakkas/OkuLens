@@ -61,6 +61,7 @@ const TOKENS=/\d+(?:[.,]\d+)*(?:['’\-][\p{L}\p{N}]+)*|[\p{L}\p{N}]+(?:['’\-]
 const numbers=text=>[...new Set(text.match(/\d+(?:[.,]\d+)*/gu)||[])];
 function classify(row){
  const t=row.text, role=row.role;
+ if(/(?:yaygınlaştırma.{0,85}(?:onay|izin|yeterli kanıt|karar verilmemesi)|otomatik yayımlama izni vermedi|genel kullanım onayı verilmemesi)/iu.test(t))return 'decision';
  if(role==='overview' && /(?:pilot|proje|belediye|amaç|hedef|deneme|tasarla)/iu.test(t))return 'overview';
  if(role==='participants'&&/\d/u.test(t))return 'participants';
  if(role==='measurement'&&/\d/u.test(t))return 'measurement';
@@ -97,9 +98,13 @@ function candidatesFor(parsed,title){
    const outcome=/(?:medyan|süre|geçti|başarı|harcama|bütçe|kesinti|gönüllü|görev|onay|yaygınlaştır)/iu.test(sentence)?1:0;
    const meta=/(?:bu metnin|bu raporun|bu örnek rapor|bu bölüm|bu dosya|özetinde|özet beklentisinde|özetleme algoritmasına|değerlendirmede yalnız)/iu.test(sentence)?1:0;
    const anaphora=/^(?:Bu|Bunlar|Üçüncü tür|İkinci sorun|Ayrıca|Böylece)\b/iu.test(sentence)?1:0;
-   item.score=1+scoreMap.get(sentence)*1.5||1;
+   item.score=1+(scoreMap.get(sentence)||0)*1.5;
    item.score+=intro*.8+outcome*.32+Math.min(nums.length,3)*.15-
      meta*1.4-anaphora*.25;
+   if(item.category==='fidelity'&&/(?:geçti|başarı|sorun bulundu|temel bilgi denetiminden)/iu.test(sentence))
+     item.score+=1.05;
+   if(item.category==='decision'&&/(?:onay|izin vermedi|yeterli kanıt|otomatik karar verilmemesi)/iu.test(sentence))
+     item.score+=.9;
    item.score+=Math.max(0,.22-candidates.length*.008);
    candidates.push(item);
   }
@@ -159,8 +164,8 @@ export function summarizeStructured(source,{title='',targetWords=100}={}){
    ['overview',120],['participants',90],['measurement',90],['fidelity',90],
    ['budget',90],['risk',95],['decision',95],['inventory',85],['workflow',75]
   ]:[
-   ['overview',38],['participants',17],['measurement',20],['fidelity',22],
-   ['decision',28]
+   ['overview',38],['participants',17],['fidelity',25],
+   ['measurement',18],['decision',23]
   ];
   for(const [role,maxWords] of order)pick(role,maxWords);
   if(!long){
