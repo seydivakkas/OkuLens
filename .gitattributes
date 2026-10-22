@@ -1,0 +1,3 @@
+# Kaynak test fiksturunun satir sonunu Windows checkout dahil degistirme.
+# SHA-256 kanitini platformlar arasinda sabit tut.
+tests/fixtures/*.txt text eol=lf
