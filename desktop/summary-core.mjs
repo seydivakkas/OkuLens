@@ -3,6 +3,7 @@
  * ONNX veya bulut üretimi değildir.
  */
 import {analyzeText} from '../shared/hybrid-nlp.mjs';
+import {summarizeStructured} from '../shared/structured-extractive.mjs';
 import {normalizeText,wordCount,summarizeExtractive} from '../shared/summarize.mjs';
 
 export const DESKTOP_TARGETS=Object.freeze([10,100,1000]);
@@ -41,6 +42,12 @@ export function createDesktopSummary(source,{title='',targetWords=100}={}){
  const started=performance.now(),clean=normalizeText(source);
  if(!clean)throw new Error('DESKTOP_EMPTY_SOURCE');
  const sourceWords=wordCount(clean);
+ // Bölüm başlıkları olan orta boy belgelerde mevcut TextRank cümle
+ // puanlamasını koru; fakat sonuçları konu/olgu/bölüm kanıtıyla seç.
+ if(sourceWords>targetWords&&clean.length<=260000){
+  const structured=summarizeStructured(clean,{title:String(title).slice(0,300),targetWords});
+  if(structured)return {...structured,processedChars:clean.length};
+ }
  if(clean.length<=260000){
   const result=analyzeText(clean,{title:String(title).slice(0,300),targetWords});
   if(result.text)return {...result,processedChars:clean.length,sourceSections:1};

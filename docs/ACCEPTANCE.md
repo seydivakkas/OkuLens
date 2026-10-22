@@ -1,3 +1,19 @@
+
+
+## İşlem 009 — Yapısal çıkarımsal özet ve kaynak kanıtları
+
+- [x] Kullanıcı isteğiyle özgün, kurgusal 1.926 kelimelik / 16.526 bayt TXT GitHub test fikstürüne eklendi; SHA-256 sabitlenmiş durumda.
+- [x] Numara başlıklı belgelerde bölüm/rol tespiti ve meta değerlendirme yönergesi dışlama kodlandı.
+- [x] 10/100/1000 cümle seçimi ve normalize kaynak karakter aralıkları kanıtları eklendi.
+- [x] GitHub Actions 10/100/1000 TXT + JSON regresyon artifact işi yapılandırıldı.
+- [ ] Windows Node/EXE gerçek CI geçişleri (sonuca bağlı).
+- [ ] Gerçek kullanıcı Windows'unda ve iki bağımsız içerik değerlendirmesinde kalite kabulü (HOLD).
+- [ ] Gerçek Qwen/ONNX, çevrimdışı GPU/VRAM ve ticari yayımlama (HOLD).
+
+[İşlem 009 belgesi](ISLEM_009_YAPISAL_KAYNAK_KANITI.md)
+
+---
+
 ## İşlem 008 — Sayısal bütünlük ve 10/100/1000 bilgi seçimi
 
 - [x] Binlik, ondalık, tarih ve para değerlerinin cümle ayırıcıdan kaybolmasını engelleyen kod ve testler yazıldı.
