@@ -114,6 +114,8 @@ function candidatesFor(parsed,title){
 function prefixFromSource(sentence,budget){
  const matches=[...sentence.matchAll(TOKENS)].slice(0,budget);
  if(!matches.length)return '';
+ while(matches.length>1&&/^(?:bir|ve|ile|için|olan|bu|şu|veya)$/iu.test(matches.at(-1)[0]))
+   matches.pop();
  const last=matches.at(-1);
  return sentence.slice(0,last.index+last[0].length);
 }
