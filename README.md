@@ -1073,3 +1073,8 @@ Yerel kanıtları **kanitlar/** klasöründe saklayın: Git bunu takip etmiyor. 
 ## İşlem 008 — Özetleme sayısal sadakat ve konu odaklı seçim
 
 Binlik/ondalık noktalı sayılar, tarih ve parasal ifadelerin cümle bölme sırasında kaybı düzeltildi. 10 kelimelik özet ana konu terimlerini gözeterek, 100/1000 özetleri de bölüm çeşitliliği ve tekrar azaltma ile seçilir. Bunlar **TextRank/TF-IDF** iyileştirmesidir; yanlış kaynak iddiasını otomatik düzeltmez. [İşlem 008](docs/ISLEM_008_SAYISAL_BUTUNLUK_VE_OZET_KALITESI.md) ve yerel `npm run summary:regression -- --input <TXT>` tekrar deneyi.
+
+
+## İşlem 009 — Bölüm farkındalıklı, kaynak kanıtlı Windows özetleme
+
+Kurgusal **1.926 kelimelik özgün rapor**, kullanıcı isteğiyle `tests/fixtures/okulens-kurgusal-kutuphane-raporu.txt` altında açık regresyon fikstürü olarak eklendi (SHA-256: `9972fdbbb651f6ac52830a903ae6fe99c52e50ac77b6663ff8b5128309ed97db`). En az üç numaralı başlığı olan belgeler için TextRank, 10/100/1000 kelimelik seçimde **ana konu/katılımcı/ölçüm/karar/bütçe/risk** bölümlerini tanır ve kaynak cümlelerinin normalize edilmiş karakter aralıklarını JSON'a yazar. Değerlendirme yönergeleri gerçek sonuç olarak seçilmez. Diğer metinlerde eski TextRank motoru korunur. **Gerçek kullanıcı kalite kabulü ve Qwen ONNX HOLD.** [İşlem 009 ayrıntıları](docs/ISLEM_009_YAPISAL_KAYNAK_KANITI.md).
