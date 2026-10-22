@@ -4,6 +4,9 @@ on:
     paths:
       - "desktop/**"
       - "shared/hybrid-nlp.mjs"
+      - "shared/structured-extractive.mjs"
+      - "tests/structured-source-evidence.test.mjs"
+      - "tests/fixtures/**"
       - "shared/summarize.mjs"
       - "package.json"
       - "tests/windows-desktop-p0.test.mjs"
@@ -43,6 +46,15 @@ jobs:
         run: |
           npm run check
           npm test
+      - name: Orijinal kurgusal TXT uzerinde 10-100-1000 regresyon
+        run: npm run summary:regression -- --input tests/fixtures/okulens-kurgusal-kutuphane-raporu.txt --output-dir kanitlar/islem009
+      - name: Islem 009 TXT ve JSON test ciktilari
+        uses: actions/upload-artifact@v4
+        with:
+          name: OkuLens-Islem-009-Ozet-Kanitlari
+          path: kanitlar/islem009/*
+          retention-days: 14
+          if-no-files-found: error
       - name: Yerel Transformers.js runtime ve ONNX WASM olustur
         run: npm run build:runtime
       - name: Electron Windows GUI gercek ozetleme smoke testi
